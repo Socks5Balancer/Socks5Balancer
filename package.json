@@ -9,10 +9,12 @@
     "start:nodemon": "nodemon dist/bundle.js",
     "start:test:client": "node dist/bundle-testClient.js",
     "start:test:backend": "node dist/bundle-testBackendServer.js",
+    "start:test:BackendTester": "node dist/bundle-testBackendTester.js",
     "build": "webpack",
     "build:watch": "webpack --watch",
     "build:test:client": "webpack --config webpack-test-client.config.js --watch",
-    "build:test:backend": "webpack --config webpack-test-backend.config.js --watch"
+    "build:test:backend": "webpack --config webpack-test-backend.config.js --watch",
+    "build:test:BackendTester": "webpack --config webpack-test-BackendTester.config.js --watch"
   },
   "dependencies": {
     "@types/bluebird": "^3.5.32",
@@ -21,6 +23,7 @@
     "bluebird": "^3.7.2",
     "lodash": "^4.17.15",
     "socks5-http-client": "^1.0.4",
+    "socks5-https-client": "^1.2.1",
     "ts-loader": "^7.0.5",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
     "tslint": "^6.1.2",
