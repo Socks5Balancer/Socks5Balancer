@@ -20,7 +20,19 @@
 import net from 'net';
 import {promisify} from 'util';
 import bluebird from 'bluebird';
+import shttp from 'socks5-http-client';
 
+shttp.get({
+  host: 'www.google.com',
+  port: 80,
+  socksHost: '127.0.0.1',
+  socksPort: 1080,
+}, (res) => {
+  res.setEncoding('utf8');
+  res.on('readable', () => {
+    console.log(res.read()); // Log response to console.
+  });
+});
 
 // The servers we will proxy to
 const upstreamServerAddresses: { host: string, port: number }[] = [
@@ -61,6 +73,7 @@ net.createServer(async (socket: net.Socket) => {
         // if ok, connect each other
         socket.pipe(s);
         s.pipe(socket);
+        console.log(`connected to ${upstream.host}:${upstream.port}`);
       });
       // if no error, dont retry and break the for-loop
       break;
@@ -76,16 +89,3 @@ net.createServer(async (socket: net.Socket) => {
 }).listen(5000, () => {
   console.log('Ready to proxy data');
 });
-
-// Create the test upstream servers
-// tslint:disable-next-line:prefer-for-of
-for (let i = 0; i < upstreamServerAddresses.length; i++) {
-  const upstream = upstreamServerAddresses[i];
-
-  net.createServer((socket) => {
-    socket.on('data', (data) => {
-      console.log('Received some data on ' + upstream.host + ':' + upstream.port);
-      console.log(data);
-    });
-  }).listen(upstream.port);
-}
