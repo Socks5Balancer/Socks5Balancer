@@ -1,4 +1,4 @@
-declare module 'socks5-http-client' {
+declare module 'socks5-https-client' {
   import {ClientRequest, IncomingMessage} from 'http';
 
   function get(url: string | {

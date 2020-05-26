@@ -18,21 +18,10 @@
 
 // https://stackoverflow.com/questions/24857127/redirecting-clients-from-one-node-js-server-to-another-node-js-server
 import net from 'net';
-import {promisify} from 'util';
 import bluebird from 'bluebird';
-import shttp from 'socks5-http-client';
+import {testSocks5} from './BackendTester';
 
-shttp.get({
-  host: 'www.google.com',
-  port: 80,
-  socksHost: '127.0.0.1',
-  socksPort: 1080,
-}, (res) => {
-  res.setEncoding('utf8');
-  res.on('readable', () => {
-    console.log(res.read()); // Log response to console.
-  });
-});
+testSocks5();
 
 // The servers we will proxy to
 const upstreamServerAddresses: { host: string, port: number }[] = [
