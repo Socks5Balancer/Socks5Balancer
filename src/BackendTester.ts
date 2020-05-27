@@ -65,6 +65,9 @@ export async function testTcp(
       const _s = net.createConnection(socksPort, socksHost, () => {
         resolve(_s);
       });
+      _s.on('error', e => {
+        reject(e);
+      });
     } catch (e) {
       reject(e);
     }

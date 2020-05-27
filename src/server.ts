@@ -52,6 +52,9 @@ export function initServer() {
             const _s = net.createConnection(upstream.port, upstream.host, () => {
               resolve(_s);
             });
+            _s.on('error', e => {
+              reject(e);
+            });
           } catch (e) {
             reject(e);
           }
