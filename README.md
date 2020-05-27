@@ -166,7 +166,13 @@ if all backend are disabled, the front connect will be reject.
 
 **Warning: if you set the `connectCheckPeriod` too short, it may wast many bandwidth.**
 
+---
 
+## which rule is best ?
+
+I recommend `change_by_time` if you often browser web page.
+if you want the IP not change, example playing some game, use `one_by_one`
+if you use it to download something and dont care about latency and IP, like BT, use `random` or `loop`
 
 
 ---
