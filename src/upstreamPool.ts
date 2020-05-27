@@ -34,14 +34,15 @@ interface UpstreamInfo {
   host: string;
   port: number;
   lastOnlineTime: moment.Moment;
-  lastConnectAble: moment.Moment;
+  lastConnectTime: moment.Moment;
+  lastConnectFailed?: boolean;
   lastConnectCheckResult?: string | any;
   isOffline?: boolean;
 }
 
 const defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> = {
   lastOnlineTime: moment(),
-  lastConnectAble: moment(),
+  lastConnectTime: moment(),
 };
 
 let lastActiveTime: moment.Moment | undefined = undefined;
@@ -99,7 +100,8 @@ export function getServerBasedOnAddress(host: string | undefined) {
       if (lastUseUpstreamIndex >= upstreamServerAddresses.length) {
         lastUseUpstreamIndex = 0;
       }
-      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
+      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline &&
+        !upstreamServerAddresses[lastUseUpstreamIndex].lastConnectFailed) {
         return upstreamServerAddresses[lastUseUpstreamIndex];
       }
       if (_lastUseUpstreamIndex === lastUseUpstreamIndex) {
@@ -112,7 +114,8 @@ export function getServerBasedOnAddress(host: string | undefined) {
   const tryGetLastServer = () => {
     const _lastUseUpstreamIndex = lastUseUpstreamIndex;
     while (true) {
-      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
+      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline &&
+        !upstreamServerAddresses[lastUseUpstreamIndex].lastConnectFailed) {
         return upstreamServerAddresses[lastUseUpstreamIndex];
       }
       ++lastUseUpstreamIndex;
@@ -125,6 +128,10 @@ export function getServerBasedOnAddress(host: string | undefined) {
       }
     }
   };
+
+  const filterValidServer = () => {
+    return upstreamServerAddresses.filter(u => !u.isOffline && u.lastConnectFailed !== false);
+  }
 
   const upstreamSelectRule: UpstreamSelectRule | undefined =
     globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
@@ -150,7 +157,12 @@ export function getServerBasedOnAddress(host: string | undefined) {
       return s;
     case UpstreamSelectRule.random:
     default:
-      s = upstreamServerAddresses[Math.floor((Math.random() * upstreamServerAddresses.length))];
+      const rs = filterValidServer();
+      if (rs.length > 0) {
+        s = rs[Math.floor((Math.random() * rs.length))];
+      } else {
+        s = undefined;
+      }
       console.log('getServerBasedOnAddress:', s);
       return s;
   }
@@ -217,15 +229,21 @@ export function startCheckTimer() {
     const testRemotePort = globalConfig.get('testRemotePort', undefined);
     const A = upstreamServerAddresses.map(u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)));
     bluebird.all(A)
+      .catch(E => {
+        // ignore it
+      })
       .finally(() => {
         // the testSocks5 return string if ok, return reject if error
         // we only wait all complete, then check complete state one by one
         if (A.length === upstreamServerAddresses.length) {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
-            if (A[i].isResolved()) {
+            if (A[i].isFulfilled()) {
               upstreamServerAddresses[i].lastConnectCheckResult = A[i].value();
-              upstreamServerAddresses[i].lastConnectAble = t;
+              upstreamServerAddresses[i].lastConnectTime = t;
+              upstreamServerAddresses[i].lastConnectFailed = false;
+            } else {
+              upstreamServerAddresses[i].lastConnectFailed = true;
             }
           }
           printPoolState();
