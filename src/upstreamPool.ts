@@ -38,11 +38,13 @@ interface UpstreamInfo {
   lastConnectFailed?: boolean;
   lastConnectCheckResult?: string | any;
   isOffline?: boolean;
+  connectCount: number;
 }
 
 const defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> = {
   lastOnlineTime: moment(),
   lastConnectTime: moment(),
+  connectCount: 0,
 };
 
 let lastActiveTime: moment.Moment | undefined = undefined;
@@ -75,6 +77,10 @@ export function printPoolState() {
   console.log('upstreamServerAddresses:', upstreamServerAddresses);
 }
 
+export function getUpstreamServerAddresses() {
+  return upstreamServerAddresses;
+}
+
 export function updateActiveTime() {
   lastActiveTime = moment();
   startCheckTimer();
@@ -87,6 +93,12 @@ export function updateOnlineTime(u: UpstreamInfo) {
 
 let lastUseUpstreamIndex = 0;
 let lastChangeUpstreamTime = moment();
+
+export function getNowRule() {
+  const upstreamSelectRule: UpstreamSelectRule | undefined =
+    globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
+  return upstreamSelectRule;
+}
 
 // This is where you pick which server to proxy to
 export function getServerBasedOnAddress(host: string | undefined) {
@@ -134,8 +146,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
     return upstreamServerAddresses.filter(u => checkServer(u));
   }
 
-  const upstreamSelectRule: UpstreamSelectRule | undefined =
-    globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
+  const upstreamSelectRule: UpstreamSelectRule | undefined = getNowRule();
 
   let s: UpstreamInfo | undefined = undefined;
   switch (upstreamSelectRule) {

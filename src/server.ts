@@ -23,6 +23,7 @@ import {globalConfig} from './configLoader';
 import {getServerBasedOnAddress, updateActiveTime, updateOnlineTime} from './upstreamPool';
 import bluebird from 'bluebird';
 import moment from 'moment';
+import {refMonitorCenter} from './stateServer/monitorCenter';
 
 let server: net.Server | undefined = undefined;
 
@@ -67,6 +68,12 @@ export function initServer() {
           s.pipe(socket);
           console.log(`connected to ${upstream.host}:${upstream.port}`);
           updateOnlineTime(upstream);
+          ++upstream.connectCount;
+          ++refMonitorCenter().connectCount;
+          socket.on('close', () => {
+            --refMonitorCenter().connectCount;
+            --upstream.connectCount;
+          });
         });
         // if no error, dont retry and break the for-loop
         return;

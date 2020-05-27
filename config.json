@@ -12,6 +12,8 @@
   "upstreamSelectRule": "random",
   "sleepTime": 1800000,
   "serverChangeTime": 5000,
+  "stateServerHost": "127.0.0.1",
+  "stateServerPort": 5010,
   "upstream": [
     {
       "host": "127.0.0.1",

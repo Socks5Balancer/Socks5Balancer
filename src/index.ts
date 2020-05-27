@@ -26,6 +26,8 @@ if (isString(process.argv[2])) {
 
 import {initUpstreamPool} from './upstreamPool';
 import {initServer} from './server';
+import {startHttpStateServer} from './stateServer/simpleHttp';
 
 initUpstreamPool();
 initServer();
+startHttpStateServer();
