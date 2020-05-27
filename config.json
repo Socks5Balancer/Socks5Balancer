@@ -1,0 +1,20 @@
+{
+  "listenPort": 5000,
+  "listenHost": "127.0.0.1",
+  "retryTimes": 3,
+  "connectTimeout": 2000,
+  "upstream": [
+    {
+      "host": "127.0.0.1",
+      "port": 3000
+    },
+    {
+      "host": "127.0.0.1",
+      "port": 3001
+    },
+    {
+      "host": "127.0.0.1",
+      "port": 3002
+    }
+  ]
+}

@@ -20,15 +20,16 @@
 import net from 'net';
 import bluebird from 'bluebird';
 import {testSocks5} from './BackendTester';
+import {globalConfig} from './configLoader';
 
 testSocks5();
 
 // The servers we will proxy to
-const upstreamServerAddresses: { host: string, port: number }[] = [
+const upstreamServerAddresses: { host: string, port: number }[] = globalConfig.get('upstream', [
   {host: '127.0.0.1', port: 3000},
   {host: '127.0.0.1', port: 3001},
   {host: '127.0.0.1', port: 3002},
-];
+]);
 
 // This is where you pick which server to proxy to
 // for examples sake, I choose a random one
@@ -40,7 +41,7 @@ function getServerBasedOnAddress(host: string | undefined) {
 // Create the proxy server
 net.createServer(async (socket: net.Socket) => {
 
-  for (let i = 0; i < 3; ++i) {
+  for (let i = 0; i < globalConfig.get('retryTimes', 3); ++i) {
     // retry 3 times
     try {
       // get a server
@@ -58,7 +59,7 @@ net.createServer(async (socket: net.Socket) => {
       });
       // if timeout, will throw a bluebird.TimeoutError
       // http://bluebirdjs.com/docs/api/timeout.html
-      await p.timeout(2 * 1000).then(s => {
+      await p.timeout(globalConfig.get('connectTimeout', 2 * 1000)).then(s => {
         // if ok, connect each other
         socket.pipe(s);
         s.pipe(socket);
@@ -75,6 +76,13 @@ net.createServer(async (socket: net.Socket) => {
   socket.end();
   socket.destroy(new Error('Cannot find valid upstream.'));
 
-}).listen(5000, () => {
-  console.log('Ready to proxy data');
-});
+}).listen(
+  globalConfig.get('listenPort', 5000),
+  globalConfig.get('listenHost', '127.0.0.1'),
+  () => {
+    console.log(`Ready to proxy data, ` +
+      `listenPort:${globalConfig.get('listenPort', 5000)} ` +
+      `listenHost:${globalConfig.get('listenHost', '127.0.0.1')}`
+    );
+  }
+);
