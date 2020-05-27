@@ -16,25 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {testSocks5} from './BackendTester';
+import {testSocks5, testTcp} from './BackendTester';
 import {globalConfig} from './configLoader';
 import {Subscription, timer} from 'rxjs';
 import moment from 'moment';
-import {assign} from 'lodash'
+import {assign, isString} from 'lodash';
+import bluebird from 'bluebird';
 
-testSocks5();
+export enum UpstreamSelectRule {
+  loop = 'loop',
+  random = 'random',
+}
+
+// tslint:disable-next-line:prefer-const
+let upstreamSelectRule: UpstreamSelectRule | undefined =
+  globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
 
 interface UpstreamInfo {
   host: string;
   port: number;
-  lastOnline: moment.Moment;
+  lastOnlineTime: moment.Moment;
   lastConnectAble: moment.Moment;
+  lastConnectCheckResult?: string | any;
+  isOffline?: boolean;
 }
 
 const defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> = {
-  lastOnline: moment(),
+  lastOnlineTime: moment(),
   lastConnectAble: moment(),
 };
+
+let lastActiveTime: moment.Moment | undefined = undefined;
 
 // The servers we will proxy to
 let upstreamServerAddresses: UpstreamInfo[] = [];
@@ -47,30 +59,120 @@ export function initUpstreamPool() {
     console.error('initUpstreamPool (upstreamServerAddresses.length === 0)');
     throw new Error('initUpstreamPool (upstreamServerAddresses.length === 0)');
   }
+  startCheckTimer();
 }
+
+export function updateActiveTime() {
+  lastActiveTime = moment();
+}
+
+export function updateOnlineTime(u: UpstreamInfo) {
+  u.isOffline = false;
+  u.lastOnlineTime = moment();
+}
+
+let lastUseUpstreamIndex = 0;
 
 // This is where you pick which server to proxy to
 // for examples sake, I choose a random one
 export function getServerBasedOnAddress(host: string | undefined) {
-  return upstreamServerAddresses[Math.floor((Math.random() * 3))]
+
+  const getNextServer = () => {
+    const _lastUseUpstreamIndex = lastUseUpstreamIndex;
+    while (true) {
+      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
+        return upstreamServerAddresses[lastUseUpstreamIndex];
+      }
+      ++lastUseUpstreamIndex;
+      if (lastUseUpstreamIndex >= upstreamServerAddresses.length) {
+        lastUseUpstreamIndex = 0;
+      }
+      if (_lastUseUpstreamIndex === lastUseUpstreamIndex) {
+        // cannot find
+        return undefined;
+      }
+    }
+  };
+
+  switch (upstreamSelectRule) {
+    case UpstreamSelectRule.loop:
+      return getNextServer();
+    case UpstreamSelectRule.random:
+    default:
+      return upstreamServerAddresses[Math.floor((Math.random() * upstreamServerAddresses.length))];
+  }
 }
 
-let socks5CheckTimer: Subscription | undefined = undefined;
+let tcpCheckTimer: Subscription | undefined = undefined;
 let connectCheckTimer: Subscription | undefined = undefined;
 
-export function startCheckTimer() {
-  if (socks5CheckTimer) {
-    socks5CheckTimer.unsubscribe();
-    socks5CheckTimer = undefined;
+export function endCheckTimer() {
+  if (tcpCheckTimer) {
+    tcpCheckTimer.unsubscribe();
+    tcpCheckTimer = undefined;
   }
   if (connectCheckTimer) {
     connectCheckTimer.unsubscribe();
     connectCheckTimer = undefined;
   }
-  socks5CheckTimer = timer(100, 5 * 1000).subscribe(value => {
+}
 
+export function startCheckTimer() {
+  if (tcpCheckTimer && connectCheckTimer) {
+    return;
+  }
+  endCheckTimer();
+  let tcpCheckStart = globalConfig.get('tcpCheckStart', 0);
+  if (tcpCheckStart < 100) {
+    tcpCheckStart = 1000;
+  }
+  let tcpCheckPeriod = globalConfig.get('tcpCheckPeriod', 0);
+  if (tcpCheckPeriod < 100) {
+    tcpCheckPeriod = 5 * 1000;
+  }
+  let connectCheckStart = globalConfig.get('connectCheckStart', 0);
+  if (connectCheckStart < 100) {
+    connectCheckStart = 5 * 60 * 1000;
+  }
+  let connectCheckPeriod = globalConfig.get('connectCheckPeriod', 0);
+  if (connectCheckPeriod < 100) {
+    connectCheckPeriod = 15 * 1000;
+  }
+  tcpCheckTimer = timer(tcpCheckStart, tcpCheckPeriod).subscribe(value => {
+    bluebird.all(upstreamServerAddresses.map(u => testTcp(u.host, u.port)))
+      .then(A => {
+        // the testTcp resolve true if ok, resolve false if error
+        // we wait all resolve, then check result one by one
+        if (A.length === upstreamServerAddresses.length) {
+          const t = moment();
+          for (let i = 0; i !== A.length; ++i) {
+            if (A[i]) {
+              upstreamServerAddresses[i].lastOnlineTime = t;
+              upstreamServerAddresses[i].isOffline = false;
+            } else {
+              upstreamServerAddresses[i].isOffline = true;
+            }
+          }
+        }
+      });
   });
-  connectCheckTimer = timer(100, 5 * 60 * 1000).subscribe(value => {
-
+  connectCheckTimer = timer(connectCheckStart, connectCheckPeriod).subscribe(value => {
+    const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
+    const testRemotePort = globalConfig.get('testRemotePort', undefined);
+    const A = upstreamServerAddresses.map(u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)));
+    bluebird.all(A)
+      .finally(() => {
+        // the testSocks5 return string if ok, return reject if error
+        // we only wait all complete, then check complete state one by one
+        if (A.length === upstreamServerAddresses.length) {
+          const t = moment();
+          for (let i = 0; i !== A.length; ++i) {
+            if (A[i].isResolved()) {
+              upstreamServerAddresses[i].lastConnectCheckResult = A[i].value();
+              upstreamServerAddresses[i].lastConnectAble = t;
+            }
+          }
+        }
+      });
   });
 }

@@ -20,8 +20,9 @@
 // Create the proxy server
 import net from 'net';
 import {globalConfig} from './configLoader';
-import {getServerBasedOnAddress} from './upstreamPool';
+import {getServerBasedOnAddress, updateActiveTime, updateOnlineTime} from './upstreamPool';
 import bluebird from 'bluebird';
+import moment from 'moment';
 
 let server: net.Server | undefined = undefined;
 
@@ -31,11 +32,18 @@ export function initServer() {
   }
   server = net.createServer(async (socket: net.Socket) => {
 
+    updateActiveTime();
+
     for (let i = 0; i < globalConfig.get('retryTimes', 3); ++i) {
       // retry 3 times
       try {
         // get a server
         const upstream = getServerBasedOnAddress(socket.remoteAddress);
+        if (!upstream) {
+          socket.end();
+          socket.destroy(new Error('cannot find valid upstream.'));
+          return;
+        }
 
         // try to connect
         const p = new bluebird<net.Socket>((resolve, reject) => {
@@ -54,6 +62,7 @@ export function initServer() {
           socket.pipe(s);
           s.pipe(socket);
           console.log(`connected to ${upstream.host}:${upstream.port}`);
+          updateOnlineTime(upstream);
         });
         // if no error, dont retry and break the for-loop
         break;

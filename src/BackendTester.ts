@@ -22,6 +22,8 @@ import bluebird from 'bluebird';
 // import shttp from 'socks5-http-client';
 import shttps from 'socks5-https-client';
 import {IncomingMessage} from 'http';
+import net from 'net'
+import {globalConfig} from './configLoader';
 
 export function testSocks5(
   socksHost: string = '127.0.0.1',
@@ -49,5 +51,31 @@ export function testSocks5(
     }).on('error', (err: Error) => {
       reject(err);
     });
+  });
+}
+
+export async function testTcp(
+  socksHost: string = '127.0.0.1',
+  socksPort: number = 1080,
+) {
+  // try to connect
+  const p = new bluebird<net.Socket>((resolve, reject) => {
+    try {
+      const _s = net.createConnection(socksPort, socksHost, () => {
+        resolve(_s);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+  // if timeout, will throw a bluebird.TimeoutError
+  // http://bluebirdjs.com/docs/api/timeout.html
+  return p.timeout(globalConfig.get('connectTimeout', 2 * 1000)).then(s => {
+    // we only test it can be connect
+    s.end();
+    s.destroy();
+    return true;
+  }).catch(e => {
+    return false;
   });
 }
