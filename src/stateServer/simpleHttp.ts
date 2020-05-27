@@ -40,6 +40,8 @@ export function startHttpStateServer() {
 <% }); %>
 ---------------------------------------------------------------------------------------------
     now time: <%= nowTime %>
+---------------------------------------------------------------------------------------------
+<%- JSON.stringify(upstreamPool, null, 2) %>
     `, {
       test: 11244,
       upstreamPool: getUpstreamServerAddresses(),
