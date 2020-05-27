@@ -26,11 +26,9 @@ import bluebird from 'bluebird';
 export enum UpstreamSelectRule {
   loop = 'loop',
   random = 'random',
+  one_by_one = 'one_by_one',
+  change_by_time = 'change_by_time',
 }
-
-// tslint:disable-next-line:prefer-const
-let upstreamSelectRule: UpstreamSelectRule | undefined =
-  globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
 
 interface UpstreamInfo {
   host: string;
@@ -84,6 +82,7 @@ export function updateOnlineTime(u: UpstreamInfo) {
 }
 
 let lastUseUpstreamIndex = 0;
+let lastChangeUpstreamTime = moment();
 
 // This is where you pick which server to proxy to
 // for examples sake, I choose a random one
@@ -106,10 +105,42 @@ export function getServerBasedOnAddress(host: string | undefined) {
     }
   };
 
+  const tryGetLastServer = () => {
+    const _lastUseUpstreamIndex = lastUseUpstreamIndex;
+    while (true) {
+      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
+        return upstreamServerAddresses[lastUseUpstreamIndex];
+      }
+      ++lastUseUpstreamIndex;
+      if (lastUseUpstreamIndex >= upstreamServerAddresses.length) {
+        lastUseUpstreamIndex = 0;
+      }
+      if (_lastUseUpstreamIndex === lastUseUpstreamIndex) {
+        // cannot find
+        return undefined;
+      }
+    }
+  };
+
+  const upstreamSelectRule: UpstreamSelectRule | undefined =
+    globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
+
   let s: UpstreamInfo | undefined = undefined;
   switch (upstreamSelectRule) {
     case UpstreamSelectRule.loop:
       s = getNextServer();
+      console.log('getServerBasedOnAddress:', s);
+      return s;
+    case UpstreamSelectRule.one_by_one:
+      s = tryGetLastServer();
+      console.log('getServerBasedOnAddress:', s);
+      return s;
+    case UpstreamSelectRule.change_by_time:
+      if (moment().diff(lastChangeUpstreamTime) > globalConfig.get('serverChangeTime', 60 * 1000)) {
+        s = getNextServer();
+      } else {
+        s = tryGetLastServer();
+      }
       console.log('getServerBasedOnAddress:', s);
       return s;
     case UpstreamSelectRule.random:

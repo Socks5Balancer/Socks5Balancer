@@ -11,6 +11,7 @@
   "connectCheckStart": 15000,
   "upstreamSelectRule": "random",
   "sleepTime": 1800000,
+  "serverChangeTime": 5000,
   "upstream": [
     {
       "host": "127.0.0.1",
