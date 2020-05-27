@@ -138,6 +138,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
     case UpstreamSelectRule.change_by_time:
       if (moment().diff(lastChangeUpstreamTime) > globalConfig.get('serverChangeTime', 60 * 1000)) {
         s = getNextServer();
+        lastChangeUpstreamTime = moment();
       } else {
         s = tryGetLastServer();
       }
