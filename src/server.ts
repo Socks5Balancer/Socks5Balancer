@@ -41,7 +41,8 @@ export function initServer() {
         const upstream = getServerBasedOnAddress(socket.remoteAddress);
         if (!upstream) {
           socket.end();
-          socket.destroy(new Error('cannot find valid upstream.'));
+          console.error('cannot get valid upstream.');
+          // socket.destroy(new Error('cannot get valid upstream.'));
           return;
         }
 
@@ -65,7 +66,7 @@ export function initServer() {
           updateOnlineTime(upstream);
         });
         // if no error, dont retry and break the for-loop
-        break;
+        return;
       } catch (e) {
         // timeout , retry it
       }
@@ -73,7 +74,8 @@ export function initServer() {
 
     // retry failed
     socket.end();
-    socket.destroy(new Error('Cannot find valid upstream.'));
+    console.error('cannot try valid upstream.');
+    // socket.destroy(new Error('Cannot try valid upstream.'));
 
   }).listen(
     globalConfig.get('listenPort', 5000),

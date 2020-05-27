@@ -106,12 +106,17 @@ export function getServerBasedOnAddress(host: string | undefined) {
     }
   };
 
+  let s: UpstreamInfo | undefined = undefined;
   switch (upstreamSelectRule) {
     case UpstreamSelectRule.loop:
-      return getNextServer();
+      s = getNextServer();
+      console.log('getServerBasedOnAddress:', s);
+      return s;
     case UpstreamSelectRule.random:
     default:
-      return upstreamServerAddresses[Math.floor((Math.random() * upstreamServerAddresses.length))];
+      s = upstreamServerAddresses[Math.floor((Math.random() * upstreamServerAddresses.length))];
+      console.log('getServerBasedOnAddress:', s);
+      return s;
   }
 }
 

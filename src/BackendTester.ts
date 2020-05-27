@@ -49,6 +49,7 @@ export function testSocks5(
     }).on('timeout', () => {
       reject(new bluebird.TimeoutError('request timeout.'));
     }).on('error', (err: Error) => {
+      console.error(`testSocks5 error on ${socksHost}:${socksPort}:`, err);
       reject(err);
     });
   });
@@ -76,6 +77,7 @@ export async function testTcp(
     s.destroy();
     return true;
   }).catch(e => {
+    console.error(`testTcp error on ${socksHost}:${socksPort}:`, e);
     return false;
   });
 }
