@@ -16,10 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {isString} from 'lodash';
+
+console.log(process.argv)
+if (isString(process.argv[2])) {
+  // tslint:disable-next-line:no-string-literal
+  process.env['globalConfigFilePath'] = process.argv[2];
+}
+
 import {initUpstreamPool} from './upstreamPool';
 import {initServer} from './server';
-
-
 
 initUpstreamPool();
 initServer();
