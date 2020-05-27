@@ -10,6 +10,7 @@
   "connectCheckPeriod": 300000,
   "connectCheckStart": 15000,
   "upstreamSelectRule": "random",
+  "sleepTime": 1800000,
   "upstream": [
     {
       "host": "127.0.0.1",

@@ -48,6 +48,17 @@ const defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> = {
 
 let lastActiveTime: moment.Moment | undefined = undefined;
 
+export function checkNeedSleep() {
+  const sleepTime = globalConfig.get('sleepTime', 30 * 60 * 1000);
+  if (lastActiveTime) {
+    if (moment().diff(lastActiveTime) > sleepTime) {
+      endCheckTimer();
+      return true;
+    }
+  }
+  return false;
+}
+
 // The servers we will proxy to
 let upstreamServerAddresses: UpstreamInfo[] = [];
 
@@ -64,6 +75,7 @@ export function initUpstreamPool() {
 
 export function updateActiveTime() {
   lastActiveTime = moment();
+  startCheckTimer();
 }
 
 export function updateOnlineTime(u: UpstreamInfo) {
@@ -122,6 +134,7 @@ export function startCheckTimer() {
     return;
   }
   endCheckTimer();
+  console.log('now to startCheckTimer.');
   let tcpCheckStart = globalConfig.get('tcpCheckStart', 0);
   if (tcpCheckStart < 100) {
     tcpCheckStart = 1000;
@@ -139,6 +152,7 @@ export function startCheckTimer() {
     connectCheckPeriod = 15 * 1000;
   }
   tcpCheckTimer = timer(tcpCheckStart, tcpCheckPeriod).subscribe(value => {
+    if (checkNeedSleep()) return;
     bluebird.all(upstreamServerAddresses.map(u => testTcp(u.host, u.port)))
       .then(A => {
         // the testTcp resolve true if ok, resolve false if error
@@ -157,6 +171,7 @@ export function startCheckTimer() {
       });
   });
   connectCheckTimer = timer(connectCheckStart, connectCheckPeriod).subscribe(value => {
+    if (checkNeedSleep()) return;
     const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
     const testRemotePort = globalConfig.get('testRemotePort', undefined);
     const A = upstreamServerAddresses.map(u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)));
