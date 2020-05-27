@@ -23,25 +23,34 @@ import {has, get, isNil, isString} from 'lodash';
 export class ConfigLoader {
   data?: { [key: string]: any };
 
-  constructor(public configPath: string) {
+  constructor(public configPath: string | undefined) {
   }
 
   initSync() {
-    try {
-      const d = fs.readFileSync(this.configPath, {encoding: 'utf8'});
-      this.data = JSON.parse(d);
-      console.log(this.data);
-      return true;
-    } catch (e) {
-      console.error('ConfigLoader initSync error', e);
+    if (this.configPath) {
+      try {
+        const d = fs.readFileSync(this.configPath, {encoding: 'utf8'});
+        this.data = JSON.parse(d);
+        console.log(this.data);
+        return true;
+      } catch (e) {
+        console.error('ConfigLoader initSync error', e);
+        return false;
+      }
+    } else {
+      console.warn('ConfigLoader initSync configPath is undefined.');
       return false;
     }
   }
 
   async init() {
     try {
-      const state = await (promisify(fs.stat))(this.configPath);
-      if (!state.isFile()) {
+      if (this.configPath) {
+        const state = await (promisify(fs.stat))(this.configPath);
+        if (!state.isFile()) {
+          return false;
+        }
+      } else {
         return false;
       }
     } catch (e) {
@@ -64,7 +73,7 @@ export class ConfigLoader {
 
 }
 
-const globalConfigFilePath: string = (process.env.globalConfigFilePath || undefined) as unknown as string;
+const globalConfigFilePath: string | undefined = (process.env.globalConfigFilePath || undefined);
 
 export const globalConfig = (() => {
   const c = new ConfigLoader(globalConfigFilePath);
