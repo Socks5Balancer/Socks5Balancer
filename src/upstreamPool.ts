@@ -20,7 +20,7 @@ import {testSocks5, testTcp} from './BackendTester';
 import {globalConfig} from './configLoader';
 import {Subscription, timer} from 'rxjs';
 import moment from 'moment';
-import {assign, isString} from 'lodash';
+import {assign} from 'lodash';
 import bluebird from 'bluebird';
 
 export enum UpstreamSelectRule {
@@ -58,7 +58,6 @@ export function checkNeedSleep() {
   return false;
 }
 
-// The servers we will proxy to
 let upstreamServerAddresses: UpstreamInfo[] = [];
 
 export function initUpstreamPool() {
@@ -90,7 +89,6 @@ let lastUseUpstreamIndex = 0;
 let lastChangeUpstreamTime = moment();
 
 // This is where you pick which server to proxy to
-// for examples sake, I choose a random one
 export function getServerBasedOnAddress(host: string | undefined) {
 
   const getNextServer = () => {
