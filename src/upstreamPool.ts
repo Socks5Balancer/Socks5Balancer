@@ -91,6 +91,11 @@ let lastChangeUpstreamTime = moment();
 // This is where you pick which server to proxy to
 export function getServerBasedOnAddress(host: string | undefined) {
 
+  const checkServer = (u: UpstreamInfo) => {
+    // return true if server alive (is a valid server)
+    return !u.isOffline && !u.lastConnectFailed;
+  }
+
   const getNextServer = () => {
     const _lastUseUpstreamIndex = lastUseUpstreamIndex;
     while (true) {
@@ -98,8 +103,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
       if (lastUseUpstreamIndex >= upstreamServerAddresses.length) {
         lastUseUpstreamIndex = 0;
       }
-      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline &&
-        !upstreamServerAddresses[lastUseUpstreamIndex].lastConnectFailed) {
+      if (checkServer(upstreamServerAddresses[lastUseUpstreamIndex])) {
         return upstreamServerAddresses[lastUseUpstreamIndex];
       }
       if (_lastUseUpstreamIndex === lastUseUpstreamIndex) {
@@ -112,8 +116,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
   const tryGetLastServer = () => {
     const _lastUseUpstreamIndex = lastUseUpstreamIndex;
     while (true) {
-      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline &&
-        !upstreamServerAddresses[lastUseUpstreamIndex].lastConnectFailed) {
+      if (checkServer(upstreamServerAddresses[lastUseUpstreamIndex])) {
         return upstreamServerAddresses[lastUseUpstreamIndex];
       }
       ++lastUseUpstreamIndex;
@@ -128,7 +131,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
   };
 
   const filterValidServer = () => {
-    return upstreamServerAddresses.filter(u => !u.isOffline && u.lastConnectFailed !== false);
+    return upstreamServerAddresses.filter(u => checkServer(u));
   }
 
   const upstreamSelectRule: UpstreamSelectRule | undefined =
