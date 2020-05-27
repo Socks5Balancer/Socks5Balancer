@@ -46,7 +46,7 @@ export function testSocks5(
       // });
     }).on('timeout', () => {
       reject(new bluebird.TimeoutError('request timeout.'));
-    }).on('error', err => {
+    }).on('error', (err: Error) => {
       reject(err);
     });
   });
