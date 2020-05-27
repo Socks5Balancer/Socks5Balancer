@@ -19,24 +19,8 @@
 // https://stackoverflow.com/questions/24857127/redirecting-clients-from-one-node-js-server-to-another-node-js-server
 import net from 'net';
 import bluebird from 'bluebird';
-import {testSocks5} from './BackendTester';
 import {globalConfig} from './configLoader';
-
-testSocks5();
-
-// The servers we will proxy to
-const upstreamServerAddresses: { host: string, port: number }[] = globalConfig.get('upstream', [
-  {host: '127.0.0.1', port: 3000},
-  {host: '127.0.0.1', port: 3001},
-  {host: '127.0.0.1', port: 3002},
-]);
-
-// This is where you pick which server to proxy to
-// for examples sake, I choose a random one
-function getServerBasedOnAddress(host: string | undefined) {
-  return upstreamServerAddresses[Math.floor((Math.random() * 3))]
-}
-
+import {getServerBasedOnAddress} from './upstreamPool';
 
 // Create the proxy server
 net.createServer(async (socket: net.Socket) => {
