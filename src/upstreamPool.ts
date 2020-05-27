@@ -92,12 +92,12 @@ export function getServerBasedOnAddress(host: string | undefined) {
   const getNextServer = () => {
     const _lastUseUpstreamIndex = lastUseUpstreamIndex;
     while (true) {
-      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
-        return upstreamServerAddresses[lastUseUpstreamIndex];
-      }
       ++lastUseUpstreamIndex;
       if (lastUseUpstreamIndex >= upstreamServerAddresses.length) {
         lastUseUpstreamIndex = 0;
+      }
+      if (!upstreamServerAddresses[lastUseUpstreamIndex].isOffline) {
+        return upstreamServerAddresses[lastUseUpstreamIndex];
       }
       if (_lastUseUpstreamIndex === lastUseUpstreamIndex) {
         // cannot find
