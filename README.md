@@ -21,7 +21,9 @@ A Simple TCP Socket Balancer for balance Multi Socks5 Proxy Backend
 
 ## config
 config is a json, the template config is `config.json`
+
 it must encode with `UTF-8 no BOM`
+
 ```json5
 {
   "listenHost": "127.0.0.1",                // the listen host, default is 127.0.0.1
@@ -74,6 +76,77 @@ the minimal config template :
 }
 
 ```
+
+## requirement
+
+build it: `nodejs`, `yarn`
+
+run it: `nodejs`, one or more socks5 proxy as backend
+
+if use archlinux:
+`pacman -S nodejs yarn npm`
+
+## how to build it ?
+
+download node_module:
+`yarn install`
+
+build it:
+`yarn run build`
+
+then, the build output is the `dist/bundle-prod.js`
+
+you can copy the file `bundle-prod.js` and a config file to any you want to run, it only require `nodejs` to run.
+
+## how to run it ?
+
+you can set the env to special config file path or set it as command params
+
+follow is two systemd config example
+
+
+set config to env `globalConfigFilePath`
+```
+# nano /etc/systemd/system/Socks5Balancer.service
+
+[Unit]
+Description=Socks5Balancer Service
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=username
+Restart=always
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+Environment=globalConfigFilePath=/home/username/Socks5Balancer/config.json
+ExecStart=/usr/bin/node /home/username/Socks5Balancer/bundle-prod.js
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+set config to command params
+```
+# nano /etc/systemd/system/Socks5Balancer.service
+
+[Unit]
+Description=Socks5Balancer Service
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=username
+Restart=always
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/node /home/username/Socks5Balancer/bundle-prod.js /home/username/Socks5Balancer/config.json
+
+[Install]
+WantedBy=multi-user.target
+```
+
 
 ---
 
