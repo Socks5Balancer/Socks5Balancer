@@ -63,7 +63,7 @@ export class ConfigLoader {
 
   get<dvT = any>(path: string, dv?: dvT): any | undefined | dvT;
   get(path: string, dv?: any): any | undefined {
-    console.log('ConfigLoader get ', [path, dv], get(this.data, path, dv));
+    // console.log('ConfigLoader get ', [path, dv], get(this.data, path, dv));
     return get(this.data, path, dv);
   }
 
