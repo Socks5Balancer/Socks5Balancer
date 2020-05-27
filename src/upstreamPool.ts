@@ -215,6 +215,10 @@ export function startCheckTimer() {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
             if (A[i]) {
+              if (upstreamServerAddresses[i].isOffline) {
+                // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
+                upstreamServerAddresses[i].lastConnectFailed = false;
+              }
               upstreamServerAddresses[i].lastOnlineTime = t;
               upstreamServerAddresses[i].isOffline = false;
             } else {
