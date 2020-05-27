@@ -42,6 +42,8 @@ it must encode with `UTF-8 no BOM`
   "upstreamSelectRule": "random",           // the Load Balance Rule. default is `random`
   "sleepTime": 1800000,                     // how many time we need to sleep after last connect. default is 1800000ms (1800s or 30min)
   "serverChangeTime": 5000,                 // the config of Load Balance Rule `change_by_time`. default is 5000ms (5s)
+  "stateServerHost": "127.0.0.1",           // the simple state monitor server host. default is 127.0.0.1
+  "stateServerPort": 5010,                  //  the simple state monitor server port. default is 5010
   "upstream": [                             // the backend server array.  default is empty. (now only support socks5 proxy server)
     {
       "host": "127.0.0.1",                  // the backend server host
@@ -176,6 +178,16 @@ if you want the IP not change, example playing some game, use `one_by_one`
 
 if you use it to download something and dont care about latency and IP, like BT, use `random` or `loop`
 
+
+---
+
+## monitor it running state
+
+a simple state monitor server can config by `stateServerHost` and `stateServerPort`
+
+it's a plain text server, use TCP connect to it, then it will output a text string include it's running info.
+
+you can use a Web Browser to check it.
 
 ---
 
