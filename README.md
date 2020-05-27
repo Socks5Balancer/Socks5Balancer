@@ -160,7 +160,7 @@ if a backend  cannot pass `connectCheck` or `tcpCheck`, this backend will be dis
 
 if all backend are disabled, the front connect will be reject.
 
-**Warning: the `connectCheck` have a long CheckPeriod (default is 5min), if it cannot work well in the Period, connect to it will han and the Balance unable to discover it.**
+**Warning: the `connectCheck` have a long CheckPeriod (default is 5min), if a backend cannot work well in the Period, connect to it will han and the Balance unable to discover it.**
 
 **Warning: Many socks5 Proxy have a strange behavior, the first connect will hang or wait many time after a lone idle.**
 
