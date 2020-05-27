@@ -71,6 +71,10 @@ export function initUpstreamPool() {
   startCheckTimer();
 }
 
+export function printPoolState() {
+  console.log('upstreamServerAddresses:', upstreamServerAddresses);
+}
+
 export function updateActiveTime() {
   lastActiveTime = moment();
   startCheckTimer();
@@ -224,6 +228,7 @@ export function startCheckTimer() {
               upstreamServerAddresses[i].lastConnectAble = t;
             }
           }
+          printPoolState();
         }
       });
   });
