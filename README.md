@@ -10,6 +10,8 @@ A Simple TCP Socket Balancer for balance Multi Socks5 Proxy Backend
 1. can monitor backend alive state
 1. can monitor backend is work well
 1. connection from front end will not connect to dead backend
+1. have 2 check way to check a backend is dead or alive
+1. if a backend revive from dead, it will be auto enable
 
 ## the Rule of Load Balance now support
 1. `loop` \: every connect will round robin on all live backend
