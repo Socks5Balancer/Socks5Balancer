@@ -107,6 +107,6 @@
   },
   "rulesDirectory": [
     //    "codelyzer"
-    //    "rxjs-tslint"
+    "rxjs-tslint"
   ]
 }
