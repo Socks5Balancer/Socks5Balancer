@@ -5,7 +5,7 @@
   "author": "Jeremie",
   "license": "MIT",
   "scripts": {
-    "start": "node dist/bundle-prod.js",
+    "start": "node dist/bundle.js",
     "start:nodemon": "nodemon dist/bundle.js",
     "start:test:client": "node dist/bundle-testClient.js",
     "start:test:backend": "node dist/bundle-testBackendServer.js",
