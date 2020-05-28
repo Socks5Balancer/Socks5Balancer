@@ -30,7 +30,7 @@ module.exports = {
         plugins: [new TsconfigPathsPlugin({configFile: 'tsconfig.json'})],
     },
     output: {
-        filename: 'bundle-prod.js',
+        filename: 'bundle-prod-debug.js',
         path: path.resolve(__dirname, 'dist')
     },
 };
