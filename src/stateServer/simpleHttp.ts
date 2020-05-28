@@ -69,7 +69,7 @@ now rule: <%= rule %>
 <br/>
 lastConnectServer:
 <% if(monitorCenter.lastConnectServer){ %>
-    <%= monitorCenter.lastConnectServer.host + monitorCenter.lastConnectServer.port %>
+    <%= monitorCenter.lastConnectServer.host + ':' + monitorCenter.lastConnectServer.port %>
 <% } else { %>
     Undefined
 <% } %>
