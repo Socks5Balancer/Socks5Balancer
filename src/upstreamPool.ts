@@ -22,6 +22,7 @@ import {Subscription, timer} from 'rxjs';
 import moment from 'moment';
 import {assign} from 'lodash';
 import bluebird from 'bluebird';
+import * as net from 'net';
 
 export enum UpstreamSelectRule {
   loop = 'loop',
@@ -31,6 +32,7 @@ export enum UpstreamSelectRule {
 }
 
 export interface UpstreamInfo {
+  index: number;
   host: string;
   port: number;
   lastOnlineTime: moment.Moment;
@@ -42,7 +44,7 @@ export interface UpstreamInfo {
   isManualDisable?: boolean;
 }
 
-let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> | undefined = undefined;
+let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port' | 'index'> | undefined = undefined;
 
 let lastActiveTime: moment.Moment | undefined = undefined;
 
@@ -58,6 +60,15 @@ export function checkNeedSleep() {
 }
 
 let upstreamServerAddresses: UpstreamInfo[] = [];
+const upstreamServerSocketStorage: Set<net.Socket>[] = [];
+
+export function getUpstreamServerSocketStorage() {
+  return upstreamServerSocketStorage;
+}
+
+export function endAllConnectOnUpstream(u: UpstreamInfo) {
+  upstreamServerSocketStorage[u.index].forEach(s => s.end());
+}
 
 export function initUpstreamPool() {
   if (!defaultUpstreamInfo) {
@@ -68,12 +79,16 @@ export function initUpstreamPool() {
     };
   }
   upstreamServerAddresses = globalConfig.get('upstream', upstreamServerAddresses);
-  upstreamServerAddresses = upstreamServerAddresses.filter(v => v.host && v.port)
-    .map(v => assign(v, defaultUpstreamInfo));
+  upstreamServerAddresses = upstreamServerAddresses.map(
+    (v, i) => assign(v, defaultUpstreamInfo, {index: i}),
+  );
   if (upstreamServerAddresses.length === 0) {
     console.error('initUpstreamPool (upstreamServerAddresses.length === 0)');
     throw new Error('initUpstreamPool (upstreamServerAddresses.length === 0)');
   }
+  upstreamServerAddresses.forEach(() => {
+    upstreamServerSocketStorage.push(new Set());
+  });
   startCheckTimer();
 }
 

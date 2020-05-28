@@ -20,7 +20,7 @@
 // Create the proxy server
 import net from 'net';
 import {globalConfig} from './configLoader';
-import {getServerBasedOnAddress, updateActiveTime, updateOnlineTime} from './upstreamPool';
+import {getServerBasedOnAddress, getUpstreamServerSocketStorage, updateActiveTime, updateOnlineTime} from './upstreamPool';
 import bluebird from 'bluebird';
 import moment from 'moment';
 import {refMonitorCenter} from './stateServer/monitorCenter';
@@ -71,11 +71,16 @@ export function initServer() {
           ++upstream.connectCount;
           ++refMonitorCenter().connectCount;
           refMonitorCenter().lastConnectServer = upstream;
+          getUpstreamServerSocketStorage()[upstream.index].add(s);
           socket.on('close', () => {
+          });
+          s.on('close', () => {
             --refMonitorCenter().connectCount;
             --upstream.connectCount;
+            getUpstreamServerSocketStorage()[upstream.index].delete(s);
           });
           s.on('error', e => {
+            // getUpstreamServerSocketStorage()[upstream.index].delete(s);
             console.warn(`a error come from backend: ${upstream.host}:${upstream.port} of:`, e);
           });
           socket.on('error', e => {
