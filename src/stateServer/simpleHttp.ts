@@ -33,7 +33,7 @@ export function startHttpStateServer() {
   server = net.createServer(async (socket: net.Socket) => {
     const outData = render(`
     now running connect: <%= monitorCenter.connectCount %>
-    now rulet: <%= rule %>
+    now rule: <%= rule %>
 ---------------------------------------------------------------------------------------------
 <% upstreamPool.forEach(function(u, i){ %>
     <%= i + 1 %>. <%= u.host %>:<%= u.port %> online:<%= !u.isOffline %> work:<%= !u.lastConnectFailed %> | running: <%= u.connectCount %> | lastOnlineTime:<%= formatTime(u.lastOnlineTime) %> lastConnectTime:<%= formatTime(u.lastConnectTime) %>
