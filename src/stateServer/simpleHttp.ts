@@ -23,19 +23,22 @@ import {refMonitorCenter} from './monitorCenter';
 import {getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
 import {isNil} from 'lodash';
 import moment from 'moment';
+import express from 'express';
 
 moment.locale(globalConfig.get('momentLocale', 'zh-cn'));
 
-let server: net.Server | undefined = undefined;
+let server: express.Application | undefined = undefined;
 
 export function startHttpStateServer() {
   if (server) {
     return;
   }
-  server = net.createServer(async (socket: net.Socket) => {
-    socket.on('error', (e: any) => {
-      console.warn('HttpStateServer socket.on error.', e);
-    });
+  server = express();
+  server.use(express.urlencoded({extended: false}));
+  const router = express.Router();
+  server.use('/', router);
+  router.all('/', (req, res) => {
+
     const outData = render(`
 <html lang="zh">
 <header>
@@ -98,24 +101,21 @@ runTime: <%- runTimeString %>
       nowTime: moment().format('ll HH:mm:ss'),
       runTimeString: moment.duration(refMonitorCenter().startTime.diff(moment())).humanize(),
     });
-    const httpRH = `
-HTTP/1.0 200 OK
-Content-Type: text/html
-Connection: Closed
-Content-Length: ${Buffer.byteLength(outData, 'utf8')}
 
-`;
-    socket.write(httpRH + outData);
-    socket.end();
-  }).listen(
+    return res.send(outData);
+  });
+  server.on('error', () => {
+    console.warn('express error.');
+  });
+  server.on('listening', () => {
+    console.log(`State Server Ready : ` +
+      `listenPort:${globalConfig.get('stateServerPort', 5010)} ` +
+      `listenHost:${globalConfig.get('stateServerHost', '127.0.0.1')}`
+    );
+  });
+  server.listen(
     globalConfig.get('stateServerPort', 5010),
     globalConfig.get('stateServerHost', '127.0.0.1'),
-    () => {
-      console.log(`State Server Ready : ` +
-        `listenPort:${globalConfig.get('stateServerPort', 5010)} ` +
-        `listenHost:${globalConfig.get('stateServerHost', '127.0.0.1')}`
-      );
-    }
   );
 }
 
