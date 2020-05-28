@@ -62,8 +62,8 @@ now rule: <%= rule %>
         <span style="color: red">False</span>
     <% } %> |
     running: <%= u.connectCount %> |
-    lastOnlineTime: <%= formatTime(u.lastOnlineTime) %>
-    lastConnectTime: <%= formatTime(u.lastConnectTime) %>
+    lastTCPCheckTime: <%= formatTime(u.lastOnlineTime) %>
+    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %>
     <br/>
 <% }); %>
 ---------------------------------------------------------------------------------------------
