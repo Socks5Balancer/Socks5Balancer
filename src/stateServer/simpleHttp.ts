@@ -16,12 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import net from 'net';
 import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
-import {getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
-import {isNil} from 'lodash';
+import {checkHaveUsableServer, getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
+import {isString, get, has, parseInt} from 'lodash';
 import moment from 'moment';
 import express from 'express';
 
@@ -47,23 +46,34 @@ now running connect: <%= monitorCenter.connectCount %>
 <br/>
 now rule: <%= rule %>
 <br/>
+<% if(!haveUsableServer){ %>
+    <h3 style="color: red">Warning: we don't have Usable Server !!! </h3>
+    <br/>
+<% } %>
 ---------------------------------------------------------------------------------------------
 <br/>
 <% upstreamPool.forEach(function(u, i){ %>
     <%= i + 1 %>. <%= u.host %>:<%= u.port %>
     online: <% if(!u.isOffline){ %>
         <span style="color: green">True</span>
-    <% }else{ %>
+    <% } else { %>
         <span style="color: red">False</span>
     <% } %>
     connectable: <% if(!u.lastConnectFailed){ %>
         <span style="color: green">True</span>
-    <% }else{ %>
+    <% } else { %>
         <span style="color: red">False</span>
     <% } %> |
     running: <%= u.connectCount %> |
     lastTCPCheckTime: <%= formatTime(u.lastOnlineTime) %>
-    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %>
+    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %> |
+    <% if(u.isManualDisable){ %>
+        <span style="color: red">Disabled</span>
+        <a href="/op?enable=<%= i %>">Enable It</a>
+    <% } else { %>
+        <span style="color: green">Enabled</span>
+        <a href="/op?disable=<%= i %>">Disable It</a>
+    <% } %>
     <br/>
 <% }); %>
 ---------------------------------------------------------------------------------------------
@@ -78,7 +88,7 @@ lastConnectServer:
 <br/>
 now time: <%= nowTime %>
 <br/>
-runTime: <%- runTimeString %>
+runTime: <%= runTimeString %>
 <br/>
 ---------------------------------------------------------------------------------------------
 <br/>
@@ -98,9 +108,27 @@ runTime: <%- runTimeString %>
       rule: getNowRule(),
       nowTime: moment().format('ll HH:mm:ss'),
       runTimeString: moment.duration(refMonitorCenter().startTime.diff(moment())).humanize(),
+      haveUsableServer: checkHaveUsableServer(),
     });
 
     return res.send(outData);
+  });
+  router.all('/op', (req, res) => {
+    console.log('/op:', req);
+    const upstreamPool = getUpstreamServerAddresses();
+    if (isString(req.query.enable)) {
+      const n = parseInt(req.query.enable, 10);
+      if (n >= 0 && n < upstreamPool.length) {
+        upstreamPool[n].isManualDisable = false;
+      }
+    }
+    if (isString(req.query.disable)) {
+      const n = parseInt(req.query.disable, 10);
+      if (n >= 0 && n < upstreamPool.length) {
+        upstreamPool[n].isManualDisable = true;
+      }
+    }
+    res.redirect('/');
   });
   server.on('error', () => {
     console.warn('express error.');

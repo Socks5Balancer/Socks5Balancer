@@ -7,23 +7,34 @@ now running connect: <%= monitorCenter.connectCount %>
 <br/>
 now rule: <%= rule %>
 <br/>
+<% if(!haveUsableServer){ %>
+    <h3 style="color: red">Warning: we don't have Usable Server !!! </h3>
+    <br/>
+<% } %>
 ---------------------------------------------------------------------------------------------
 <br/>
 <% upstreamPool.forEach(function(u, i){ %>
     <%= i + 1 %>. <%= u.host %>:<%= u.port %>
     online: <% if(!u.isOffline){ %>
         <span style="color: green">True</span>
-    <% }else{ %>
+    <% } else { %>
         <span style="color: red">False</span>
     <% } %>
     connectable: <% if(!u.lastConnectFailed){ %>
         <span style="color: green">True</span>
-    <% }else{ %>
+    <% } else { %>
         <span style="color: red">False</span>
     <% } %> |
     running: <%= u.connectCount %> |
     lastTCPCheckTime: <%= formatTime(u.lastOnlineTime) %>
-    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %>
+    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %> |
+    <% if(u.isManualDisable){ %>
+        <span style="color: red">Disabled</span>
+        <a href="/op?enable=<%= i %>">Enable It</a>
+    <% } else { %>
+        <span style="color: green">Enabled</span>
+        <a href="/op?disable=<%= i %>">Disable It</a>
+    <% } %>
     <br/>
 <% }); %>
 ---------------------------------------------------------------------------------------------
