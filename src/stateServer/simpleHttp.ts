@@ -24,6 +24,8 @@ import {getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
 import {isNil} from 'lodash';
 import moment from 'moment';
 
+moment.locale(globalConfig.get('momentLocale', 'zh-cn'));
+
 let server: net.Server | undefined = undefined;
 
 export function startHttpStateServer() {
@@ -33,6 +35,9 @@ export function startHttpStateServer() {
   server = net.createServer(async (socket: net.Socket) => {
     const outData = render(`
 <html lang="zh">
+<header>
+    <meta charset="UTF-8"/>
+</header>
 <body>
 now running connect: <%= monitorCenter.connectCount %>
 <br/>
@@ -69,6 +74,8 @@ lastConnectServer:
 <br/>
 now time: <%= nowTime %>
 <br/>
+runTime: <%- runTimeString %>
+<br/>
 ---------------------------------------------------------------------------------------------
 <br/>
 <pre>
@@ -82,16 +89,17 @@ now time: <%= nowTime %>
       upstreamPool: getUpstreamServerAddresses(),
       monitorCenter: refMonitorCenter(),
       formatTime: (m: moment.Moment | undefined) => {
-        return m ? m.format('YYYY-MM-DD HH:mm:ss') : 'undefined';
+        return m ? m.format('ll HH:mm:ss') : 'undefined';
       },
       rule: getNowRule(),
-      nowTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+      nowTime: moment().format('ll HH:mm:ss'),
+      runTimeString: moment.duration(refMonitorCenter().startTime.diff(moment())).humanize(),
     });
     const httpRH = `
 HTTP/1.0 200 OK
 Content-Type: text/html
 Connection: Closed
-Content-Length: ${outData.length}
+Content-Length: ${Buffer.byteLength(outData, 'utf8')}
 
 `;
     socket.write(httpRH + outData);

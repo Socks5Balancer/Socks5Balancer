@@ -44,6 +44,8 @@ it must encode with `UTF-8 no BOM`
   "serverChangeTime": 5000,                 // the config of Load Balance Rule `change_by_time`. default is 5000ms (5s)
   "stateServerHost": "127.0.0.1",           // the simple state monitor server host. default is 127.0.0.1
   "stateServerPort": 5010,                  //  the simple state monitor server port. default is 5010
+  //  the `momentLocale` is moment format. now only build with en & zh-cn for best size. if you need more language, can enable on `webpack-prod.config.js` -> `MomentLocalesPlugin`
+  "momentLocale": "en",                     // the time localization config. now it can be `en` or `zh-cn`. default is `en`
   "upstream": [                             // the backend server array.  default is empty. (now only support socks5 proxy server)
     {
       "host": "127.0.0.1",                  // the backend server host

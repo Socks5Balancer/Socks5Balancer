@@ -14,6 +14,7 @@
   "serverChangeTime": 5000,
   "stateServerHost": "127.0.0.1",
   "stateServerPort": 5010,
+  "momentLocale": "en",
   "upstream": [
     {
       "host": "127.0.0.1",
