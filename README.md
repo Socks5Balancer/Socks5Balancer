@@ -199,10 +199,10 @@ you can use a Web Browser to check it.
 - [ ] support Load Balance Rule `fast_download_speed`
 - [ ] support Load Balance Rule `fast_upload_speed`
 - [ ] add server priority
-- [ ] add control function on state monitor
-- [ ] add manual disable function on state monitor
+- [x] add control function on state monitor
+- [x] add manual disable function on state monitor
 - [ ] add runtime rule change function on state monitor
-- [ ] add manual close connect function on state monitor
+- [x] add manual close connect function on state monitor
 - [ ] auto close all connect when switch (change) server
 - [ ] show connect speed on state monitor
 - [ ] show how many data was transfer in data monitor
