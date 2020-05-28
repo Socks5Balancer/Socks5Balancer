@@ -30,7 +30,7 @@ export enum UpstreamSelectRule {
   change_by_time = 'change_by_time',
 }
 
-interface UpstreamInfo {
+export interface UpstreamInfo {
   host: string;
   port: number;
   lastOnlineTime: moment.Moment;

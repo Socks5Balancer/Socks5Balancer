@@ -70,6 +70,7 @@ export function initServer() {
           updateOnlineTime(upstream);
           ++upstream.connectCount;
           ++refMonitorCenter().connectCount;
+          refMonitorCenter().lastConnectServer = upstream;
           socket.on('close', () => {
             --refMonitorCenter().connectCount;
             --upstream.connectCount;
