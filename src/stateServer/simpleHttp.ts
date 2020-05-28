@@ -33,6 +33,9 @@ export function startHttpStateServer() {
     return;
   }
   server = net.createServer(async (socket: net.Socket) => {
+    socket.on('error', (e: any) => {
+      console.warn('HttpStateServer socket.on error.', e);
+    });
     const outData = render(`
 <html lang="zh">
 <header>
