@@ -19,7 +19,7 @@
 import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
-import {checkHaveUsableServer, getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
+import {checkHaveUsableServer, endAllConnectOnUpstream, getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
 import {isString, get, has, parseInt} from 'lodash';
 import moment from 'moment';
 import express from 'express';
@@ -74,6 +74,7 @@ now rule: <%= rule %>
         <span style="color: green">Enabled</span>
         <a href="/op?disable=<%= i %>">Disable It</a>
     <% } %>
+    <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
     <br/>
 <% }); %>
 ---------------------------------------------------------------------------------------------
@@ -114,18 +115,27 @@ runTime: <%= runTimeString %>
     return res.send(outData);
   });
   router.all('/op', (req, res) => {
-    console.log('/op:', req);
+    // console.log('/op:', req);
     const upstreamPool = getUpstreamServerAddresses();
     if (isString(req.query.enable)) {
       const n = parseInt(req.query.enable, 10);
       if (n >= 0 && n < upstreamPool.length) {
         upstreamPool[n].isManualDisable = false;
+        res.statusMessage = 'OK';
       }
     }
     if (isString(req.query.disable)) {
       const n = parseInt(req.query.disable, 10);
       if (n >= 0 && n < upstreamPool.length) {
         upstreamPool[n].isManualDisable = true;
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.endConnectOnServer)) {
+      const n = parseInt(req.query.endConnectOnServer, 10);
+      if (n >= 0 && n < upstreamPool.length) {
+        endAllConnectOnUpstream(upstreamPool[n]);
+        res.statusMessage = 'OK';
       }
     }
     res.redirect('/');
