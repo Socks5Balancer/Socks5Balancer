@@ -39,6 +39,7 @@ export interface UpstreamInfo {
   lastConnectCheckResult?: string | any;
   isOffline?: boolean;
   connectCount: number;
+  isManualDisable?: boolean;
 }
 
 let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> | undefined = undefined;
@@ -103,13 +104,17 @@ export function getNowRule() {
   return upstreamSelectRule;
 }
 
+export function checkHaveUsableServer() {
+  return !!upstreamServerAddresses.find(u => checkServer(u));
+}
+
+function checkServer(u: UpstreamInfo) {
+  // return true if server alive (is a valid server)
+  return !u.isOffline && !u.lastConnectFailed && !u.isManualDisable;
+}
+
 // This is where you pick which server to proxy to
 export function getServerBasedOnAddress(host: string | undefined) {
-
-  const checkServer = (u: UpstreamInfo) => {
-    // return true if server alive (is a valid server)
-    return !u.isOffline && !u.lastConnectFailed;
-  }
 
   const getNextServer = () => {
     const _lastUseUpstreamIndex = lastUseUpstreamIndex;
