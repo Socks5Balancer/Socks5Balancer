@@ -41,11 +41,7 @@ export interface UpstreamInfo {
   connectCount: number;
 }
 
-const defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> = {
-  lastOnlineTime: moment(),
-  lastConnectTime: moment(),
-  connectCount: 0,
-};
+let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port'> | undefined = undefined;
 
 let lastActiveTime: moment.Moment | undefined = undefined;
 
@@ -63,6 +59,13 @@ export function checkNeedSleep() {
 let upstreamServerAddresses: UpstreamInfo[] = [];
 
 export function initUpstreamPool() {
+  if (!defaultUpstreamInfo) {
+    defaultUpstreamInfo = {
+      lastOnlineTime: moment(),
+      lastConnectTime: moment(),
+      connectCount: 0,
+    };
+  }
   upstreamServerAddresses = globalConfig.get('upstream', upstreamServerAddresses);
   upstreamServerAddresses = upstreamServerAddresses.filter(v => v.host && v.port)
     .map(v => assign(v, defaultUpstreamInfo));

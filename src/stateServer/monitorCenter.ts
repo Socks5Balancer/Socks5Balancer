@@ -8,8 +8,11 @@ export class MonitorCenter {
   lastConnectServer: UpstreamInfo | undefined;
 }
 
-let monitorCenter = new MonitorCenter();
+let monitorCenter: MonitorCenter | undefined = undefined;
 
 export function refMonitorCenter() {
+  if (!monitorCenter) {
+    monitorCenter = new MonitorCenter();
+  }
   return monitorCenter;
 }
