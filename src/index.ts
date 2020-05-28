@@ -27,6 +27,10 @@ if (isString(process.argv[2])) {
 import {initUpstreamPool} from './upstreamPool';
 import {initServer} from './server';
 import {startHttpStateServer} from './stateServer/simpleHttp';
+import {globalConfig} from './configLoader';
+
+import moment from 'moment';
+moment.locale(globalConfig.get('momentLocale', 'zh-cn'));
 
 initUpstreamPool();
 initServer();

@@ -25,8 +25,6 @@ import {isNil} from 'lodash';
 import moment from 'moment';
 import express from 'express';
 
-moment.locale(globalConfig.get('momentLocale', 'zh-cn'));
-
 let server: express.Application | undefined = undefined;
 
 export function startHttpStateServer() {
