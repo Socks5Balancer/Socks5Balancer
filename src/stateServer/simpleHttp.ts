@@ -32,16 +32,51 @@ export function startHttpStateServer() {
   }
   server = net.createServer(async (socket: net.Socket) => {
     const outData = render(`
-    now running connect: <%= monitorCenter.connectCount %>
-    now rule: <%= rule %>
+<html lang="zh">
+<body>
+now running connect: <%= monitorCenter.connectCount %>
+<br/>
+now rule: <%= rule %>
+<br/>
 ---------------------------------------------------------------------------------------------
+<br/>
 <% upstreamPool.forEach(function(u, i){ %>
-    <%= i + 1 %>. <%= u.host %>:<%= u.port %> online:<%= !u.isOffline %> work:<%= !u.lastConnectFailed %> | running: <%= u.connectCount %> | lastOnlineTime:<%= formatTime(u.lastOnlineTime) %> lastConnectTime:<%= formatTime(u.lastConnectTime) %>
+    <%= i + 1 %>. <%= u.host %>:<%= u.port %>
+    online: <% if(!u.isOffline){ %>
+        <span style="color: green">True</span>
+    <% }else{ %>
+        <span style="color: red">False</span>
+    <% } %>
+    work: <% if(!u.lastConnectFailed){ %>
+        <span style="color: green">True</span>
+    <% }else{ %>
+        <span style="color: red">False</span>
+    <% } %> |
+    running: <%= u.connectCount %> |
+    lastOnlineTime: <%= formatTime(u.lastOnlineTime) %>
+    lastConnectTime: <%= formatTime(u.lastConnectTime) %>
+    <br/>
 <% }); %>
 ---------------------------------------------------------------------------------------------
-    now time: <%= nowTime %>
+<br/>
+lastConnectServer:
+<% if(monitorCenter.lastConnectServer){ %>
+    <%= monitorCenter.lastConnectServer.host + monitorCenter.lastConnectServer.port %>
+<% } else { %>
+    Undefined
+<% } %>
+<br/>
+<br/>
+now time: <%= nowTime %>
+<br/>
 ---------------------------------------------------------------------------------------------
+<br/>
+<pre>
 <%- JSON.stringify(upstreamPool, null, 2) %>
+</pre>
+</body>
+</html>
+
     `, {
       test: 11244,
       upstreamPool: getUpstreamServerAddresses(),
@@ -52,7 +87,14 @@ export function startHttpStateServer() {
       rule: getNowRule(),
       nowTime: moment().format('YYYY-MM-DD HH:mm:ss'),
     });
-    socket.write(outData);
+    const httpRH = `
+HTTP/1.0 200 OK
+Content-Type: text/html
+Connection: Closed
+Content-Length: ${outData.length}
+
+`;
+    socket.write(httpRH + outData);
     socket.end();
   }).listen(
     globalConfig.get('stateServerPort', 5010),
