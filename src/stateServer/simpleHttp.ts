@@ -29,6 +29,7 @@ import {
 import {isString, get, has, parseInt} from 'lodash';
 import moment from 'moment';
 import express from 'express';
+import {getListenInfo} from '../server';
 
 let server: express.Application | undefined = undefined;
 
@@ -149,6 +150,8 @@ runTime: <%= runTimeString %>
 <br/>
 runTime: <%= runTimeString2 %>
 <br/>
+listen On: <%= listenOn %>
+<br/>
 ---------------------------------------------------------------------------------------------
 <br/>
 <pre>
@@ -170,6 +173,7 @@ runTime: <%= runTimeString2 %>
       runTimeString2: formatDuration(-refMonitorCenter().startTime.diff(moment())),
       haveUsableServer: checkHaveUsableServer(),
       UpstreamSelectRuleList: UpstreamSelectRuleList,
+      listenOn: getListenInfo().listenHost + ':' + getListenInfo().listenPort,
     });
 
     return res.send(outData);

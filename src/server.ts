@@ -27,6 +27,13 @@ import {refMonitorCenter} from './stateServer/monitorCenter';
 
 let server: net.Server | undefined = undefined;
 
+export function getListenInfo() {
+  return {
+    listenPort: globalConfig.get('listenPort', 5000),
+    listenHost: globalConfig.get('listenHost', '127.0.0.1'),
+  };
+}
+
 export function initServer() {
   if (server) {
     return;
@@ -109,8 +116,8 @@ export function initServer() {
     // socket.destroy(new Error('Cannot try valid upstream.'));
 
   }).listen(
-    globalConfig.get('listenPort', 5000),
-    globalConfig.get('listenHost', '127.0.0.1'),
+    getListenInfo().listenPort,
+    getListenInfo().listenHost,
     () => {
       console.log(`Ready to proxy data, ` +
         `listenPort:${globalConfig.get('listenPort', 5000)} ` +
