@@ -47,6 +47,27 @@ export function startHttpStateServer() {
   server.use('/', router);
   router.all('/', (req, res) => {
 
+    const speedArray: string[] = new Array(getUpstreamServerAddresses().length).fill('');
+
+    if (speedArray.length === refMonitorCenter()?.upstreamServerDataStatistical.length) {
+      refMonitorCenter()?.upstreamServerDataStatistical.forEach((v, i) => {
+        let s = v.speed;
+        speedArray[i] = '' + s % 1024 + 'B/s';
+        s /= 1024;
+        if (s > 0) {
+          speedArray[i] = '' + s % 1024 + 'K/s';
+        }
+        s /= 1024;
+        if (s > 0) {
+          speedArray[i] = '' + s % 1024 + 'M/s';
+        }
+        s /= 1024;
+        if (s > 0) {
+          speedArray[i] = '' + s % 1024 + 'G/s';
+        }
+      });
+    }
+
     const outData = render(`
 <html lang="zh">
 <header>
@@ -100,6 +121,7 @@ now rule: <%= rule %>
         <th>online</th>
         <th>connectable</th>
         <th>running</th>
+        <th>speed</th>
         <th>lastTCPCheckTime</th>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
@@ -128,6 +150,7 @@ now rule: <%= rule %>
                 <% } %>
             </td>
             <td><%= u.connectCount %></td>
+            <td><%= speedArray[i] %></td>
             <td><%= formatTime(u.lastOnlineTime) %></td>
             <td><%= formatTime(u.lastConnectTime) %></td>
             <td>
@@ -151,7 +174,7 @@ now rule: <%= rule %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="10">
+        <td colspan="11">
             <a href="/op?cleanAllCheckState=1">Clean Check State</a>
         </td>
     </tr>
@@ -200,6 +223,7 @@ listen On: <%= listenOn %>
       UpstreamSelectRuleList: UpstreamSelectRuleList,
       listenOn: getListenInfo().listenHost + ':' + getListenInfo().listenPort,
       lastUseUpstreamIndex: getLastUseUpstreamIndex(),
+      speedArray: speedArray,
     });
 
     return res.send(outData);
