@@ -213,7 +213,7 @@ lastConnectServer:
     Undefined
 <% } %>
 <br/>
-lastUseUpstreamIndex: <%= lastUseUpstreamIndex %>
+lastUseUpstreamIndex: <%= lastUseUpstreamIndex+1 %>
 <br/>
 <br/>
 now time: <%= nowTime %>
