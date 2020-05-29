@@ -105,6 +105,8 @@ now time: <%= nowTime %>
 <br/>
 runTime: <%= runTimeString %>
 <br/>
+runTime: <%= runTimeString2 %>
+<br/>
 ---------------------------------------------------------------------------------------------
 <br/>
 <pre>
@@ -123,6 +125,7 @@ runTime: <%= runTimeString %>
       rule: getNowRule(),
       nowTime: moment().format('ll HH:mm:ss'),
       runTimeString: moment.duration(refMonitorCenter().startTime.diff(moment())).humanize(),
+      runTimeString2: formatDuration(-refMonitorCenter().startTime.diff(moment())),
       haveUsableServer: checkHaveUsableServer(),
       UpstreamSelectRuleList: UpstreamSelectRuleList,
     });
@@ -176,3 +179,24 @@ runTime: <%= runTimeString %>
   );
 }
 
+
+// https://github.com/moment/moment/issues/463#issuecomment-552498641
+const formatInt = (int: number): string => {
+  if (int < 10) {
+    return `0${int}`;
+  }
+  return `${int}`;
+};
+
+export const formatDuration = (time: string | number): string => {
+  const seconds = moment.duration(time).seconds();
+  const minutes = moment.duration(time).minutes();
+  const hours = moment.duration(time).hours();
+  if (hours > 0) {
+    return `${formatInt(hours)}:${formatInt(minutes)}:${formatInt(seconds)}`;
+  }
+  if (minutes > 0) {
+    return `${formatInt(minutes)}:${formatInt(seconds)}`;
+  }
+  return `00:${formatInt(seconds)}`;
+};
