@@ -127,6 +127,16 @@ export function setNowRule(r: UpstreamSelectRule) {
   }
 }
 
+export function forceSetLastUseUpstreamIndex(i: number) {
+  if (i >= 0 && i < upstreamServerAddresses.length) {
+    lastUseUpstreamIndex = i;
+  }
+}
+
+export function getLastUseUpstreamIndex() {
+  return lastUseUpstreamIndex;
+}
+
 export function cleanAllCheckState() {
   upstreamServerAddresses.forEach(v => {
     v.isOffline = false;

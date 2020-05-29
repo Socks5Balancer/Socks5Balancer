@@ -54,6 +54,7 @@ now rule: <%= rule %>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
         <th>Close Connect</th>
+        <th>Select</th>
         <!--        <th></th>-->
     </tr>
     </thead>
@@ -91,6 +92,9 @@ now rule: <%= rule %>
             <td>
                 <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
             </td>
+            <td>
+                <a href="/op?forceNowUseServer=<%= i %>">Use This Now</a>
+            </td>
             <!--            <td></td>-->
         </tr>
     <% }); %>
@@ -111,6 +115,8 @@ lastConnectServer:
 <% } else { %>
     Undefined
 <% } %>
+<br/>
+lastUseUpstreamIndex: <%= lastUseUpstreamIndex %>
 <br/>
 <br/>
 now time: <%= nowTime %>

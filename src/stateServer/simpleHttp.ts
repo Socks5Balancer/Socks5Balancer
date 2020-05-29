@@ -20,11 +20,15 @@ import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
 import {
-  checkHaveUsableServer, cleanAllCheckState,
-  endAllConnectOnUpstream, forceCheckNow,
+  checkHaveUsableServer,
+  cleanAllCheckState,
+  endAllConnectOnUpstream,
+  forceCheckNow,
+  forceSetLastUseUpstreamIndex, getLastUseUpstreamIndex,
   getNowRule,
-  getUpstreamServerAddresses, setNowRule,
-  UpstreamSelectRuleList
+  getUpstreamServerAddresses,
+  setNowRule,
+  UpstreamSelectRuleList,
 } from '../upstreamPool';
 import {isString, get, has, parseInt, isNil} from 'lodash';
 import moment from 'moment';
@@ -100,6 +104,7 @@ now rule: <%= rule %>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
         <th>Close Connect</th>
+        <th>Select</th>
         <!--        <th></th>-->
     </tr>
     </thead>
@@ -137,13 +142,16 @@ now rule: <%= rule %>
             <td>
                 <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
             </td>
+            <td>
+                <a href="/op?forceNowUseServer=<%= i %>">Use This Now</a>
+            </td>
             <!--            <td></td>-->
         </tr>
     <% }); %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="9">
+        <td colspan="10">
             <a href="/op?cleanAllCheckState=1">Clean Check State</a>
         </td>
     </tr>
@@ -157,6 +165,8 @@ lastConnectServer:
 <% } else { %>
     Undefined
 <% } %>
+<br/>
+lastUseUpstreamIndex: <%= lastUseUpstreamIndex %>
 <br/>
 <br/>
 now time: <%= nowTime %>
@@ -189,6 +199,7 @@ listen On: <%= listenOn %>
       haveUsableServer: checkHaveUsableServer(),
       UpstreamSelectRuleList: UpstreamSelectRuleList,
       listenOn: getListenInfo().listenHost + ':' + getListenInfo().listenPort,
+      lastUseUpstreamIndex: getLastUseUpstreamIndex(),
     });
 
     return res.send(outData);
@@ -220,6 +231,13 @@ listen On: <%= listenOn %>
       const n = parseInt(req.query.endConnectOnServer, 10);
       if (n >= 0 && n < upstreamPool.length) {
         endAllConnectOnUpstream(upstreamPool[n]);
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.forceNowUseServer)) {
+      const n = parseInt(req.query.forceNowUseServer, 10);
+      if (n >= 0 && n < upstreamPool.length) {
+        forceSetLastUseUpstreamIndex(n);
         res.statusMessage = 'OK';
       }
     }
