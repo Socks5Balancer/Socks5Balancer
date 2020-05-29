@@ -75,12 +75,18 @@ export function initServer() {
           socket.on('close', () => {
           });
           s.on('close', () => {
-            --refMonitorCenter().connectCount;
-            --upstream.connectCount;
-            getUpstreamServerSocketStorage()[upstream.index].delete(s);
+            if (getUpstreamServerSocketStorage()[upstream.index].has(s)) {
+              getUpstreamServerSocketStorage()[upstream.index].delete(s);
+              --refMonitorCenter().connectCount;
+              --upstream.connectCount;
+            }
           });
           s.on('error', e => {
-            // getUpstreamServerSocketStorage()[upstream.index].delete(s);
+            if (getUpstreamServerSocketStorage()[upstream.index].has(s)) {
+              getUpstreamServerSocketStorage()[upstream.index].delete(s);
+              --refMonitorCenter().connectCount;
+              --upstream.connectCount;
+            }
             if (globalConfig.get('internalBehavior.connectResetMeansOffline', true)) {
               upstream.isOffline = true;
             }
