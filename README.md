@@ -59,7 +59,11 @@ it must encode with `UTF-8 no BOM`
       "host": "127.0.0.1",
       "port": 3002
     }
-  ]
+  ],
+  "internalBehavior": {                     // some inner config , if you dont known how it work, you dont need care it.
+    "connectResetMeansOffline": true,       // if detect the connect be reset, Think of that backend as Offline. default is true
+    "statisticalTimerPeriod": 1000          // the backend statistical period, if your server have low CPU, you can reduce it. default is 1000ms (1s)
+  }
 }
 ```
 
