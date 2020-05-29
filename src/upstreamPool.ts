@@ -18,7 +18,7 @@
 
 import {testSocks5, testTcp} from './BackendTester';
 import {globalConfig} from './configLoader';
-import {Subscription, timer} from 'rxjs';
+import {Observable, Subscription, timer, merge, Subject} from 'rxjs';
 import moment from 'moment';
 import {assign} from 'lodash';
 import bluebird from 'bluebird';
@@ -232,6 +232,12 @@ export function endCheckTimer() {
   }
 }
 
+const forceCheckObservable = new Subject();
+
+export function forceCheckNow() {
+  forceCheckObservable.next();
+}
+
 export function startCheckTimer() {
   if (tcpCheckTimer && connectCheckTimer) {
     return;
@@ -254,7 +260,7 @@ export function startCheckTimer() {
   if (connectCheckPeriod < 100) {
     connectCheckPeriod = 15 * 1000;
   }
-  tcpCheckTimer = timer(tcpCheckStart, tcpCheckPeriod).subscribe(value => {
+  tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod)).subscribe(() => {
     if (checkNeedSleep()) return;
     bluebird.all(upstreamServerAddresses.map(u => testTcp(u.host, u.port)))
       .then(A => {
@@ -277,7 +283,7 @@ export function startCheckTimer() {
         }
       });
   });
-  connectCheckTimer = timer(connectCheckStart, connectCheckPeriod).subscribe(value => {
+  connectCheckTimer = merge(forceCheckObservable, timer(connectCheckStart, connectCheckPeriod)).subscribe(() => {
     if (checkNeedSleep()) return;
     const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
     const testRemotePort = globalConfig.get('testRemotePort', undefined);

@@ -21,7 +21,7 @@ import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
 import {
   checkHaveUsableServer, cleanAllCheckState,
-  endAllConnectOnUpstream,
+  endAllConnectOnUpstream, forceCheckNow,
   getNowRule,
   getUpstreamServerAddresses, setNowRule,
   UpstreamSelectRuleList
@@ -227,6 +227,7 @@ listen On: <%= listenOn %>
       const n = parseInt(req.query.cleanAllCheckState, 10);
       if (n === 1) {
         cleanAllCheckState();
+        forceCheckNow();
         res.statusMessage = 'OK';
       }
     }
