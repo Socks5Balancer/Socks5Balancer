@@ -7,6 +7,14 @@ now running connect: <%= monitorCenter.connectCount %>
 <br/>
 now rule: <%= rule %>
 <br/>
+<form action="/op" method="get" target="_self">
+    <select name="newRule">
+        <% UpstreamSelectRuleList.forEach(function(u, i){ %>
+            <option value="<%= u %>" <%= u === rule ? 'selected' : '' %>><%= u %></option>
+        <% }); %>
+    </select>
+    <input type="submit" value="Change It"/>
+</form>
 <% if(!haveUsableServer){ %>
     <h3 style="color: red">Warning: we don't have Usable Server !!! </h3>
     <br/>

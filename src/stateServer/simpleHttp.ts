@@ -19,7 +19,13 @@
 import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
-import {checkHaveUsableServer, endAllConnectOnUpstream, getNowRule, getUpstreamServerAddresses} from '../upstreamPool';
+import {
+  checkHaveUsableServer,
+  endAllConnectOnUpstream,
+  getNowRule,
+  getUpstreamServerAddresses, setNowRule,
+  UpstreamSelectRuleList
+} from '../upstreamPool';
 import {isString, get, has, parseInt} from 'lodash';
 import moment from 'moment';
 import express from 'express';
@@ -46,6 +52,14 @@ now running connect: <%= monitorCenter.connectCount %>
 <br/>
 now rule: <%= rule %>
 <br/>
+<form action="/op" method="get" target="_self">
+    <select name="newRule">
+        <% UpstreamSelectRuleList.forEach(function(u, i){ %>
+            <option value="<%= u %>" <%= u === rule ? 'selected' : '' %>><%= u %></option>
+        <% }); %>
+    </select>
+    <input type="submit" value="Change It"/>
+</form>
 <% if(!haveUsableServer){ %>
     <h3 style="color: red">Warning: we don't have Usable Server !!! </h3>
     <br/>
@@ -110,13 +124,20 @@ runTime: <%= runTimeString %>
       nowTime: moment().format('ll HH:mm:ss'),
       runTimeString: moment.duration(refMonitorCenter().startTime.diff(moment())).humanize(),
       haveUsableServer: checkHaveUsableServer(),
+      UpstreamSelectRuleList: UpstreamSelectRuleList,
     });
 
     return res.send(outData);
   });
   router.all('/op', (req, res) => {
-    // console.log('/op:', req);
+    console.log('/op:', req);
     const upstreamPool = getUpstreamServerAddresses();
+    if (isString(req.query.newRule)) {
+      if (UpstreamSelectRuleList.find(v => v === req.query.newRule)) {
+        setNowRule(req.query.newRule as any);
+        res.statusMessage = 'OK';
+      }
+    }
     if (isString(req.query.enable)) {
       const n = parseInt(req.query.enable, 10);
       if (n >= 0 && n < upstreamPool.length) {

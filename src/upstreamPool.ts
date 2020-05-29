@@ -31,6 +31,8 @@ export enum UpstreamSelectRule {
   change_by_time = 'change_by_time',
 }
 
+export const UpstreamSelectRuleList = Object.values(UpstreamSelectRule);
+
 export interface UpstreamInfo {
   index: number;
   host: string;
@@ -89,6 +91,7 @@ export function initUpstreamPool() {
   upstreamServerAddresses.forEach(() => {
     upstreamServerSocketStorage.push(new Set());
   });
+  nowUpstreamSelectRule = globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
   startCheckTimer();
 }
 
@@ -112,11 +115,16 @@ export function updateOnlineTime(u: UpstreamInfo) {
 
 let lastUseUpstreamIndex = 0;
 let lastChangeUpstreamTime = moment();
+let nowUpstreamSelectRule: UpstreamSelectRule | undefined = undefined;
 
 export function getNowRule() {
-  const upstreamSelectRule: UpstreamSelectRule | undefined =
-    globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
-  return upstreamSelectRule;
+  return nowUpstreamSelectRule;
+}
+
+export function setNowRule(r: UpstreamSelectRule) {
+  if (UpstreamSelectRuleList.find(v => v === r)) {
+    nowUpstreamSelectRule = r;
+  }
 }
 
 export function checkHaveUsableServer() {
