@@ -24,6 +24,7 @@ import {getServerBasedOnAddress, getUpstreamServerSocketStorage, updateActiveTim
 import bluebird from 'bluebird';
 import moment from 'moment';
 import {refMonitorCenter} from './stateServer/monitorCenter';
+import {PipListener} from './stateServer/PipListener';
 
 let server: net.Server | undefined = undefined;
 
@@ -71,8 +72,25 @@ export function initServer() {
         // http://bluebirdjs.com/docs/api/timeout.html
         await p.timeout(globalConfig.get('connectTimeout', 2 * 1000)).then(s => {
           // if ok, connect each other
-          socket.pipe(s);
-          s.pipe(socket);
+          const pUp = new PipListener();
+          const pDown = new PipListener();
+          socket.pipe(pUp).pipe(s);
+          s.pipe(pDown).pipe(socket);
+
+          const uSubUp = pUp.asObservable().subscribe(value => {
+            // TODO
+          });
+          const uSubDown = pDown.asObservable().subscribe(value => {
+            // TODO
+          });
+
+          pUp.once('end', () => {
+            uSubUp.unsubscribe();
+          });
+          pDown.once('end', () => {
+            uSubDown.unsubscribe();
+          });
+
           console.log(`connected to ${upstream.host}:${upstream.port}`);
           updateOnlineTime(upstream);
           ++upstream.connectCount;
