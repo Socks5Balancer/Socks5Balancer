@@ -59,6 +59,10 @@ export function startHttpStateServer() {
             border-right-width: 0;
             border-top-width: 0;
         }
+
+        tr:hover {
+            background-color: lightblue;
+        }
     </style>
 </header>
 <body>
