@@ -30,6 +30,7 @@
     }
   ],
   "internalBehavior": {
-    "connectResetMeansOffline": true
+    "connectResetMeansOffline": true,
+    "statisticalTimerPeriod": 1000
   }
 }

@@ -90,6 +90,12 @@ export function initServer() {
           pDown.once('end', () => {
             uSubDown.unsubscribe();
           });
+          pUp.once('error', () => {
+            uSubUp.unsubscribe();
+          });
+          pDown.once('error', () => {
+            uSubDown.unsubscribe();
+          });
 
           console.log(`connected to ${upstream.host}:${upstream.port}`);
           updateOnlineTime(upstream);
