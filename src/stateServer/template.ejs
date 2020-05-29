@@ -51,6 +51,7 @@ now rule: <%= rule %>
         <th>connectable</th>
         <th>running</th>
         <th>speed</th>
+        <th>data</th>
         <th>lastTCPCheckTime</th>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
@@ -80,6 +81,7 @@ now rule: <%= rule %>
             </td>
             <td><%= u.connectCount %></td>
             <td><%= speedArray[i] %></td>
+            <td><%= dataArray[i] %></td>
             <td><%= formatTime(u.lastOnlineTime) %></td>
             <td><%= formatTime(u.lastConnectTime) %></td>
             <td>
@@ -103,7 +105,7 @@ now rule: <%= rule %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="11">
+        <td colspan="12">
             <a href="/op?cleanAllCheckState=1">Clean Check State</a>
         </td>
     </tr>

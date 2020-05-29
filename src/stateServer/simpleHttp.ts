@@ -48,22 +48,37 @@ export function startHttpStateServer() {
   router.all('/', (req, res) => {
 
     const speedArray: string[] = new Array(getUpstreamServerAddresses().length).fill('');
+    const dataArray: string[] = new Array(getUpstreamServerAddresses().length).fill('');
 
     if (speedArray.length === refMonitorCenter()?.upstreamServerDataStatistical.length) {
       refMonitorCenter()?.upstreamServerDataStatistical.forEach((v, i) => {
-        let s = v.speed;
-        speedArray[i] = '' + s % 1024 + 'B/s';
-        s /= 1024;
-        if (s > 0) {
-          speedArray[i] = '' + s % 1024 + 'K/s';
+        const s = v.speed;
+        if (s < 1024) {
+          speedArray[i] = '' + s + 'Byte/s';
+        } else if (s < Math.pow(1024, 2)) {
+          speedArray[i] = '' + s / Math.pow(1024, 1) + 'KB/s';
+        } else if (s < Math.pow(1024, 3)) {
+          speedArray[i] = '' + s / Math.pow(1024, 2) + 'MB/s';
+        } else if (s < Math.pow(1024, 4)) {
+          speedArray[i] = '' + s / Math.pow(1024, 3) + 'GB/s';
+        } else if (s < Math.pow(1024, 5)) {
+          speedArray[i] = '' + s / Math.pow(1024, 4) + 'TB/s';
+        } else if (s < Math.pow(1024, 6)) {
+          speedArray[i] = '' + s / Math.pow(1024, 5) + 'EB/s';
         }
-        s /= 1024;
-        if (s > 0) {
-          speedArray[i] = '' + s % 1024 + 'M/s';
-        }
-        s /= 1024;
-        if (s > 0) {
-          speedArray[i] = '' + s % 1024 + 'G/s';
+        const d = v.count;
+        if (d < 1024) {
+          dataArray[i] = '' + d + 'Byte';
+        } else if (d < Math.pow(1024, 2)) {
+          dataArray[i] = '' + d / Math.pow(1024, 1) + 'KB';
+        } else if (d < Math.pow(1024, 3)) {
+          dataArray[i] = '' + d / Math.pow(1024, 2) + 'MB';
+        } else if (d < Math.pow(1024, 4)) {
+          dataArray[i] = '' + d / Math.pow(1024, 3) + 'GB';
+        } else if (d < Math.pow(1024, 5)) {
+          dataArray[i] = '' + d / Math.pow(1024, 4) + 'TB';
+        } else if (d < Math.pow(1024, 6)) {
+          dataArray[i] = '' + d / Math.pow(1024, 5) + 'EB';
         }
       });
     }
@@ -122,6 +137,7 @@ now rule: <%= rule %>
         <th>connectable</th>
         <th>running</th>
         <th>speed</th>
+        <th>data</th>
         <th>lastTCPCheckTime</th>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
@@ -151,6 +167,7 @@ now rule: <%= rule %>
             </td>
             <td><%= u.connectCount %></td>
             <td><%= speedArray[i] %></td>
+            <td><%= dataArray[i] %></td>
             <td><%= formatTime(u.lastOnlineTime) %></td>
             <td><%= formatTime(u.lastConnectTime) %></td>
             <td>
@@ -174,7 +191,7 @@ now rule: <%= rule %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="11">
+        <td colspan="12">
             <a href="/op?cleanAllCheckState=1">Clean Check State</a>
         </td>
     </tr>
@@ -224,6 +241,7 @@ listen On: <%= listenOn %>
       listenOn: getListenInfo().listenHost + ':' + getListenInfo().listenPort,
       lastUseUpstreamIndex: getLastUseUpstreamIndex(),
       speedArray: speedArray,
+      dataArray: dataArray,
     });
 
     return res.send(outData);
