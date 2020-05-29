@@ -46,6 +46,19 @@ export function startHttpStateServer() {
 <html lang="zh">
 <header>
     <meta charset="UTF-8"/>
+    <style type="text/css">
+        th {
+            border: black 0 dashed;
+            border-left-width: 1px;
+            border-bottom: lightslategrey 1px solid;
+        }
+
+        td {
+            border: lightslategrey 1px solid;
+            border-right-width: 0;
+            border-top-width: 0;
+        }
+    </style>
 </header>
 <body>
 now running connect: <%= monitorCenter.connectCount %>
@@ -66,31 +79,60 @@ now rule: <%= rule %>
 <% } %>
 ---------------------------------------------------------------------------------------------
 <br/>
-<% upstreamPool.forEach(function(u, i){ %>
-    <%= i + 1 %>. <%= u.host %>:<%= u.port %>
-    online: <% if(!u.isOffline){ %>
-        <span style="color: green">True</span>
-    <% } else { %>
-        <span style="color: red">False</span>
-    <% } %>
-    connectable: <% if(!u.lastConnectFailed){ %>
-        <span style="color: green">True</span>
-    <% } else { %>
-        <span style="color: red">False</span>
-    <% } %> |
-    running: <%= u.connectCount %> |
-    lastTCPCheckTime: <%= formatTime(u.lastOnlineTime) %>
-    lastConnectCheckTime: <%= formatTime(u.lastConnectTime) %> |
-    <% if(u.isManualDisable){ %>
-        <span style="color: red">Disabled</span>
-        <a href="/op?enable=<%= i %>">Enable It</a>
-    <% } else { %>
-        <span style="color: green">Enabled</span>
-        <a href="/op?disable=<%= i %>">Disable It</a>
-    <% } %>
-    <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
-    <br/>
-<% }); %>
+<table style="border: black 3px dashed;">
+    <thead>
+    <tr>
+        <th style="border-left-width: 0;">No.</th>
+        <th>Host:Port</th>
+        <th>online</th>
+        <th>connectable</th>
+        <th>running</th>
+        <th>lastTCPCheckTime</th>
+        <th>lastConnectCheckTime</th>
+        <th>ManualDisable</th>
+        <th>Close Connect</th>
+        <!--        <th></th>-->
+    </tr>
+    </thead>
+    <tbody>
+    <% upstreamPool.forEach(function(u, i){ %>
+        <tr>
+            <td style="border-left-width: 0;"><%= i + 1 %>.</td>
+            <td><%= u.host %>:<%= u.port %></td>
+            <td>
+                <% if(!u.isOffline){ %>
+                    <span style="color: green">True</span>
+                <% } else { %>
+                    <span style="color: red">False</span>
+                <% } %>
+            </td>
+            <td>
+                <% if(!u.lastConnectFailed){ %>
+                    <span style="color: green">True</span>
+                <% } else { %>
+                    <span style="color: red">False</span>
+                <% } %>
+            </td>
+            <td><%= u.connectCount %></td>
+            <td><%= formatTime(u.lastOnlineTime) %></td>
+            <td><%= formatTime(u.lastConnectTime) %></td>
+            <td>
+                <% if(u.isManualDisable){ %>
+                    <span style="color: red">Disabled</span>
+                    <a href="/op?enable=<%= i %>">Enable It</a>
+                <% } else { %>
+                    <span style="color: green">Enabled</span>
+                    <a href="/op?disable=<%= i %>">Disable It</a>
+                <% } %>
+            </td>
+            <td>
+                <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
+            </td>
+            <!--            <td></td>-->
+        </tr>
+    <% }); %>
+    </tbody>
+</table>
 ---------------------------------------------------------------------------------------------
 <br/>
 lastConnectServer:
