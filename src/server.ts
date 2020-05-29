@@ -81,6 +81,9 @@ export function initServer() {
           });
           s.on('error', e => {
             // getUpstreamServerSocketStorage()[upstream.index].delete(s);
+            if (globalConfig.get('internalBehavior.connectResetMeansOffline', true)) {
+              upstream.isOffline = true;
+            }
             console.warn(`a error come from backend: ${upstream.host}:${upstream.port} of:`, e);
           });
           socket.on('error', e => {
