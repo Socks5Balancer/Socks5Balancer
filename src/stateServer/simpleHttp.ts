@@ -142,13 +142,13 @@ now rule: <%= rule %>
         <th>online</th>
         <th>connectable</th>
         <th>running</th>
-        <th>speed</th>
-        <th>data</th>
         <th>lastTCPCheckTime</th>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
         <th>Close Connect</th>
         <th>Select</th>
+        <th>data</th>
+        <th>speed</th>
         <!--        <th></th>-->
     </tr>
     </thead>
@@ -172,8 +172,6 @@ now rule: <%= rule %>
                 <% } %>
             </td>
             <td><%= u.connectCount %></td>
-            <td><%= speedArray[i] %></td>
-            <td><%= dataArray[i] %></td>
             <td><%= formatTime(u.lastOnlineTime) %></td>
             <td><%= formatTime(u.lastConnectTime) %></td>
             <td>
@@ -191,6 +189,8 @@ now rule: <%= rule %>
             <td>
                 <a href="/op?forceNowUseServer=<%= i %>">Use This Now</a>
             </td>
+            <td><%= dataArray[i] %></td>
+            <td><%= speedArray[i] %></td>
             <!--            <td></td>-->
         </tr>
     <% }); %>
