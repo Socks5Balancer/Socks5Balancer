@@ -17,6 +17,10 @@
         tr:hover {
             background-color: lightblue;
         }
+
+        tfoot > tr:hover {
+            background-color: inherit;
+        }
     </style>
 </header>
 <body>
@@ -91,6 +95,13 @@ now rule: <%= rule %>
         </tr>
     <% }); %>
     </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="9">
+            <a href="/op?cleanAllCheckState=1">Clean Check State</a>
+        </td>
+    </tr>
+    </tfoot>
 </table>
 ---------------------------------------------------------------------------------------------
 <br/>

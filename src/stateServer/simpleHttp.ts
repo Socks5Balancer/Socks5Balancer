@@ -20,13 +20,13 @@ import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
 import {
-  checkHaveUsableServer,
+  checkHaveUsableServer, cleanAllCheckState,
   endAllConnectOnUpstream,
   getNowRule,
   getUpstreamServerAddresses, setNowRule,
   UpstreamSelectRuleList
 } from '../upstreamPool';
-import {isString, get, has, parseInt} from 'lodash';
+import {isString, get, has, parseInt, isNil} from 'lodash';
 import moment from 'moment';
 import express from 'express';
 import {getListenInfo} from '../server';
@@ -62,6 +62,10 @@ export function startHttpStateServer() {
 
         tr:hover {
             background-color: lightblue;
+        }
+
+        tfoot > tr:hover {
+            background-color: inherit;
         }
     </style>
 </header>
@@ -137,6 +141,13 @@ now rule: <%= rule %>
         </tr>
     <% }); %>
     </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="9">
+            <a href="/op?cleanAllCheckState=1">Clean Check State</a>
+        </td>
+    </tr>
+    </tfoot>
 </table>
 ---------------------------------------------------------------------------------------------
 <br/>
@@ -209,6 +220,13 @@ listen On: <%= listenOn %>
       const n = parseInt(req.query.endConnectOnServer, 10);
       if (n >= 0 && n < upstreamPool.length) {
         endAllConnectOnUpstream(upstreamPool[n]);
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.cleanAllCheckState)) {
+      const n = parseInt(req.query.cleanAllCheckState, 10);
+      if (n === 1) {
+        cleanAllCheckState();
         res.statusMessage = 'OK';
       }
     }

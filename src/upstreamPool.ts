@@ -127,6 +127,13 @@ export function setNowRule(r: UpstreamSelectRule) {
   }
 }
 
+export function cleanAllCheckState() {
+  upstreamServerAddresses.forEach(v => {
+    v.isOffline = false;
+    v.lastConnectFailed = false;
+  });
+}
+
 export function checkHaveUsableServer() {
   return !!upstreamServerAddresses.find(u => checkServer(u));
 }
