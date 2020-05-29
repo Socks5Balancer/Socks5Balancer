@@ -41,15 +41,15 @@ function speed2String(s: number) {
   if (s < 1024) {
     return '' + s + 'Byte/s';
   } else if (s < Math.pow(1024, 2)) {
-    return '' + (s / Math.pow(1024, 1)).toFixed(4) + 'KB/s';
+    return '' + formatNumber2FixedLength(s / Math.pow(1024, 1)) + 'KB/s';
   } else if (s < Math.pow(1024, 3)) {
-    return '' + (s / Math.pow(1024, 2)).toFixed(4) + 'MB/s';
+    return '' + formatNumber2FixedLength(s / Math.pow(1024, 2)) + 'MB/s';
   } else if (s < Math.pow(1024, 4)) {
-    return '' + (s / Math.pow(1024, 3)).toFixed(4) + 'GB/s';
+    return '' + formatNumber2FixedLength(s / Math.pow(1024, 3)) + 'GB/s';
   } else if (s < Math.pow(1024, 5)) {
-    return '' + (s / Math.pow(1024, 4)).toFixed(4) + 'TB/s';
+    return '' + formatNumber2FixedLength(s / Math.pow(1024, 4)) + 'TB/s';
   } else if (s < Math.pow(1024, 6)) {
-    return '' + (s / Math.pow(1024, 5)).toFixed(4) + 'EB/s';
+    return '' + formatNumber2FixedLength(s / Math.pow(1024, 5)) + 'EB/s';
   }
 }
 
@@ -57,15 +57,15 @@ function dataCount2String(d: number) {
   if (d < 1024) {
     return '' + d + 'Byte';
   } else if (d < Math.pow(1024, 2)) {
-    return '' + (d / Math.pow(1024, 1)).toFixed(4) + 'KB';
+    return '' + formatNumber2FixedLength(d / Math.pow(1024, 1)) + 'KB';
   } else if (d < Math.pow(1024, 3)) {
-    return '' + (d / Math.pow(1024, 2)).toFixed(4) + 'MB';
+    return '' + formatNumber2FixedLength(d / Math.pow(1024, 2)) + 'MB';
   } else if (d < Math.pow(1024, 4)) {
-    return '' + (d / Math.pow(1024, 3)).toFixed(4) + 'GB';
+    return '' + formatNumber2FixedLength(d / Math.pow(1024, 3)) + 'GB';
   } else if (d < Math.pow(1024, 5)) {
-    return '' + (d / Math.pow(1024, 4)).toFixed(4) + 'TB';
+    return '' + formatNumber2FixedLength(d / Math.pow(1024, 4)) + 'TB';
   } else if (d < Math.pow(1024, 6)) {
-    return '' + (d / Math.pow(1024, 5)).toFixed(4) + 'EB';
+    return '' + formatNumber2FixedLength(d / Math.pow(1024, 5)) + 'EB';
   }
 }
 
@@ -343,3 +343,7 @@ export const formatDuration = (time: string | number): string => {
   }
   return `00:${formatInt(seconds)}`;
 };
+
+function formatNumber2FixedLength(n: number) {
+  return n.toFixed(3);
+}
