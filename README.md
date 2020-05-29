@@ -201,9 +201,9 @@ you can use a Web Browser to check it.
 - [ ] add server priority
 - [x] add control function on state monitor
 - [x] add manual disable function on state monitor
-- [ ] add runtime rule change function on state monitor
+- [X] add runtime rule change function on state monitor
 - [x] add manual close connect function on state monitor
 - [ ] auto close all connect when switch (change) server
-- [ ] show connect speed on state monitor
-- [ ] show how many data was transfer in data monitor
+- [X] show connect speed on state monitor
+- [X] show how many data was transfer in data monitor
 
