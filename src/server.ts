@@ -78,10 +78,10 @@ export function initServer() {
           s.pipe(pDown).pipe(socket);
 
           const uSubUp = pUp.asObservable().subscribe(value => {
-            // TODO
+            refMonitorCenter().upstreamServerDataStatistical[upstream.index].up.count += value.countDiff;
           });
           const uSubDown = pDown.asObservable().subscribe(value => {
-            // TODO
+            refMonitorCenter().upstreamServerDataStatistical[upstream.index].down.count += value.countDiff;
           });
 
           pUp.once('end', () => {

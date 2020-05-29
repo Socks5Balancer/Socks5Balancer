@@ -37,6 +37,38 @@ import {getListenInfo} from '../server';
 
 let server: express.Application | undefined = undefined;
 
+function speed2String(s: number) {
+  if (s < 1024) {
+    return '' + s + 'Byte/s';
+  } else if (s < Math.pow(1024, 2)) {
+    return '' + (s / Math.pow(1024, 1)).toFixed(4) + 'KB/s';
+  } else if (s < Math.pow(1024, 3)) {
+    return '' + (s / Math.pow(1024, 2)).toFixed(4) + 'MB/s';
+  } else if (s < Math.pow(1024, 4)) {
+    return '' + (s / Math.pow(1024, 3)).toFixed(4) + 'GB/s';
+  } else if (s < Math.pow(1024, 5)) {
+    return '' + (s / Math.pow(1024, 4)).toFixed(4) + 'TB/s';
+  } else if (s < Math.pow(1024, 6)) {
+    return '' + (s / Math.pow(1024, 5)).toFixed(4) + 'EB/s';
+  }
+}
+
+function dataCount2String(d: number) {
+  if (d < 1024) {
+    return '' + d + 'Byte';
+  } else if (d < Math.pow(1024, 2)) {
+    return '' + (d / Math.pow(1024, 1)).toFixed(4) + 'KB';
+  } else if (d < Math.pow(1024, 3)) {
+    return '' + (d / Math.pow(1024, 2)).toFixed(4) + 'MB';
+  } else if (d < Math.pow(1024, 4)) {
+    return '' + (d / Math.pow(1024, 3)).toFixed(4) + 'GB';
+  } else if (d < Math.pow(1024, 5)) {
+    return '' + (d / Math.pow(1024, 4)).toFixed(4) + 'TB';
+  } else if (d < Math.pow(1024, 6)) {
+    return '' + (d / Math.pow(1024, 5)).toFixed(4) + 'EB';
+  }
+}
+
 export function startHttpStateServer() {
   if (server) {
     return;
@@ -52,34 +84,8 @@ export function startHttpStateServer() {
 
     if (speedArray.length === refMonitorCenter()?.upstreamServerDataStatistical.length) {
       refMonitorCenter()?.upstreamServerDataStatistical.forEach((v, i) => {
-        const s = v.speed;
-        if (s < 1024) {
-          speedArray[i] = '' + s + 'Byte/s';
-        } else if (s < Math.pow(1024, 2)) {
-          speedArray[i] = '' + s / Math.pow(1024, 1) + 'KB/s';
-        } else if (s < Math.pow(1024, 3)) {
-          speedArray[i] = '' + s / Math.pow(1024, 2) + 'MB/s';
-        } else if (s < Math.pow(1024, 4)) {
-          speedArray[i] = '' + s / Math.pow(1024, 3) + 'GB/s';
-        } else if (s < Math.pow(1024, 5)) {
-          speedArray[i] = '' + s / Math.pow(1024, 4) + 'TB/s';
-        } else if (s < Math.pow(1024, 6)) {
-          speedArray[i] = '' + s / Math.pow(1024, 5) + 'EB/s';
-        }
-        const d = v.count;
-        if (d < 1024) {
-          dataArray[i] = '' + d + 'Byte';
-        } else if (d < Math.pow(1024, 2)) {
-          dataArray[i] = '' + d / Math.pow(1024, 1) + 'KB';
-        } else if (d < Math.pow(1024, 3)) {
-          dataArray[i] = '' + d / Math.pow(1024, 2) + 'MB';
-        } else if (d < Math.pow(1024, 4)) {
-          dataArray[i] = '' + d / Math.pow(1024, 3) + 'GB';
-        } else if (d < Math.pow(1024, 5)) {
-          dataArray[i] = '' + d / Math.pow(1024, 4) + 'TB';
-        } else if (d < Math.pow(1024, 6)) {
-          dataArray[i] = '' + d / Math.pow(1024, 5) + 'EB';
-        }
+        speedArray[i] = '↑' + speed2String(v.up.speed) + ' ↓' + speed2String(v.down.speed);
+        dataArray[i] = '↑' + dataCount2String(v.up.count) + ' ↓' + dataCount2String(v.down.count);
       });
     }
 

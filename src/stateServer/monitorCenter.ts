@@ -21,6 +21,7 @@ export class ServerDataStatistical {
     const s = this.count - this.lastCheckCount;
     period = period > 0 ? period : 0;
     this.speed = s * 1000 / period;
+    this.lastCheckCount = this.count;
   }
 }
 
@@ -29,7 +30,7 @@ export class MonitorCenter {
   connectCount: number = 0;
   startTime: moment.Moment = moment();
   lastConnectServer: UpstreamInfo | undefined;
-  upstreamServerDataStatistical: ServerDataStatistical[] = [];
+  upstreamServerDataStatistical: { up: ServerDataStatistical, down: ServerDataStatistical }[] = [];
   statisticalTimer: Observable<number> | undefined;
 }
 
@@ -38,11 +39,16 @@ let monitorCenter: MonitorCenter | undefined = undefined;
 export function refMonitorCenter() {
   if (!monitorCenter) {
     monitorCenter = new MonitorCenter();
-    monitorCenter.upstreamServerDataStatistical = getUpstreamServerAddresses().map(() => new ServerDataStatistical());
+    monitorCenter.upstreamServerDataStatistical = getUpstreamServerAddresses().map(() => {
+      return {up: new ServerDataStatistical(), down: new ServerDataStatistical()};
+    });
     const statisticalTimerPeriod = globalConfig.get('internalBehavior.statisticalTimerPeriod', 1000);
     monitorCenter.statisticalTimer = timer(1000, statisticalTimerPeriod);
     monitorCenter.statisticalTimer.subscribe(() => {
-      monitorCenter?.upstreamServerDataStatistical.forEach(v => v.check(statisticalTimerPeriod));
+      monitorCenter?.upstreamServerDataStatistical.forEach(v => {
+        v.up.check(statisticalTimerPeriod);
+        v.down.check(statisticalTimerPeriod);
+      });
     });
   }
   return monitorCenter;

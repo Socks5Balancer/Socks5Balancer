@@ -25,6 +25,7 @@ import {isNumber, isNil, isBoolean, isArray, isFunction} from 'lodash';
 export interface PipListenerObservData {
   speed: number;
   nowSpeed: number;
+  countDiff: number;
   count: number;
   averageSpeed: number;
 }
@@ -117,6 +118,7 @@ export class PipListener extends Transform {
           return {
             // lastCheck: lastCheck,
             // thisCheck: thisCheck,
+            countDiff: thisCheck - lastCheck,
             count: this.count,
             speed: this.lastSpeed,
             nowSpeed: speed,
@@ -135,7 +137,7 @@ export class PipListener extends Transform {
     return (chunk as ArrayBuffer).byteLength;
   };
 
-  public getLastState() {
+  public getLastState(): PipListenerObservData {
     const thisCheck = this.lastCheck;
     const speed = 0;
     this.lastSpeed = (this.lastSpeed * this.lastSpeedSmoothRate)
@@ -145,6 +147,7 @@ export class PipListener extends Transform {
       averageSpeed = this.count / this.endTime.diff(moment(this.startTime)) * 1000.0;
     }
     return {
+      countDiff: 0,
       count: this.count,
       speed: this.lastSpeed,
       nowSpeed: speed,
