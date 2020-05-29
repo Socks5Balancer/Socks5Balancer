@@ -192,7 +192,8 @@ now rule: <%= rule %>
     <tfoot>
     <tr>
         <td colspan="12">
-            <a href="/op?cleanAllCheckState=1">Clean Check State</a>
+            &emsp;<a href="/op?cleanAllCheckState=1">Clean Check State</a>
+            &emsp;<a href="/op?endAllConnect=1">Force Close All Connect</a>
         </td>
     </tr>
     </tfoot>
@@ -288,6 +289,13 @@ listen On: <%= listenOn %>
       if (n === 1) {
         cleanAllCheckState();
         forceCheckNow();
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.endAllConnect)) {
+      const n = parseInt(req.query.endAllConnect, 10);
+      if (n === 1) {
+        upstreamPool.forEach(v => endAllConnectOnUpstream(v));
         res.statusMessage = 'OK';
       }
     }
