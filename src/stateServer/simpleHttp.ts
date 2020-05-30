@@ -227,6 +227,16 @@ listen On: <%= listenOn %>
 <br/>
 ---------------------------------------------------------------------------------------------
 <br/>
+<h5>Fast Issue Resolve</h5>
+<ul>
+    <li>Web page Open very Sloooow :&emsp;<a href="/op?endAllConnect=1">Force Close All Connect</a></li>
+    <li>Seems like Server State not update :&emsp;<a href="/op?forceCheckAllServer=1">Force Check All Now</a></li>
+    <li>I Want To Disable All Server :&emsp;<a href="/op?disableAllServer=1">Disable All Server</a></li>
+    <li>I Want To Enable All Server :&emsp;<a href="/op?enableAllServer=1">Enable All Server</a></li>
+</ul>
+<br/>
+---------------------------------------------------------------------------------------------
+<br/>
 <pre>
 <%- JSON.stringify(upstreamPool, null, 2) %>
 </pre>
@@ -310,6 +320,20 @@ listen On: <%= listenOn %>
       const n = parseInt(req.query.forceCheckAllServer, 10);
       if (n === 1) {
         forceCheckNow();
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.disableAllServer)) {
+      const n = parseInt(req.query.disableAllServer, 10);
+      if (n === 1) {
+        upstreamPool.forEach(v => v.isManualDisable = true);
+        res.statusMessage = 'OK';
+      }
+    }
+    if (isString(req.query.enableAllServer)) {
+      const n = parseInt(req.query.enableAllServer, 10);
+      if (n === 1) {
+        upstreamPool.forEach(v => v.isManualDisable = false);
         res.statusMessage = 'OK';
       }
     }
