@@ -210,4 +210,7 @@ you can use a Web Browser to check it.
 - [ ] auto close all connect when switch (change) server
 - [X] show connect speed on state monitor
 - [X] show how many data was transfer in data monitor
+- [ ] Analysis socks5 proxy
+- [ ] Direct Impl Proxy Client
+- [ ] Impl Trojan Proxy Client
 
