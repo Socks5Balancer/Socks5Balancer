@@ -17,14 +17,17 @@
   "momentLocale": "en",
   "upstream": [
     {
+      "name": "serverA",
       "host": "127.0.0.1",
       "port": 3000
     },
     {
+      "name": "serverB",
       "host": "127.0.0.1",
       "port": 3001
     },
     {
+      "name": "serverC",
       "host": "127.0.0.1",
       "port": 3002
     }

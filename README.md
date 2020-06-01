@@ -48,6 +48,7 @@ it must encode with `UTF-8 no BOM`
   "momentLocale": "en",                     // the time localization config. now it can be `en` or `zh-cn`. default is `en`
   "upstream": [                             // the backend server array.  default is empty. (now only support socks5 proxy server)
     {
+      "name": "Server Name A",              // the backend server name string, you can use any string on this
       "host": "127.0.0.1",                  // the backend server host
       "port": 3000                          // the backend server port
     },

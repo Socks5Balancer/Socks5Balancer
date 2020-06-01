@@ -139,6 +139,7 @@ now rule: <%= rule %>
     <tr>
         <th style="border-left-width: 0;">No.</th>
         <th>Host:Port</th>
+        <th>name</th>
         <th>online</th>
         <th>connectable</th>
         <th>running</th>
@@ -157,6 +158,7 @@ now rule: <%= rule %>
         <tr>
             <td style="border-left-width: 0;"><%= i + 1 %>.</td>
             <td><%= u.host %>:<%= u.port %></td>
+            <td><%= (!u.name ? '' : u.name) %></td>
             <td>
                 <% if(!u.isOffline){ %>
                     <span style="color: green">True</span>
@@ -197,7 +199,7 @@ now rule: <%= rule %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="12">
+        <td colspan="13">
             &emsp;<a href="/op?cleanAllCheckState=1">Clean Check State</a>
             &emsp;<a href="/op?endAllConnect=1">Force Close All Connect</a>
             &emsp;<a href="/op?forceCheckAllServer=1">Force Check All Now</a>
@@ -214,7 +216,7 @@ lastConnectServer:
     Undefined
 <% } %>
 <br/>
-lastUseUpstreamIndex: <%= lastUseUpstreamIndex+1 %>
+lastUseUpstreamIndex: <%= lastUseUpstreamIndex + 1 %>
 <br/>
 <br/>
 now time: <%= nowTime %>

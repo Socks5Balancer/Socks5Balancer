@@ -20,7 +20,7 @@ import {testSocks5, testTcp} from './BackendTester';
 import {globalConfig} from './configLoader';
 import {Observable, Subscription, timer, merge, Subject} from 'rxjs';
 import moment from 'moment';
-import {assign} from 'lodash';
+import {assign, isString, isNumber} from 'lodash';
 import bluebird from 'bluebird';
 import * as net from 'net';
 
@@ -37,6 +37,7 @@ export interface UpstreamInfo {
   index: number;
   host: string;
   port: number;
+  name: string | undefined;
   lastOnlineTime: moment.Moment;
   lastConnectTime: moment.Moment;
   lastConnectFailed?: boolean;
@@ -46,7 +47,7 @@ export interface UpstreamInfo {
   isManualDisable?: boolean;
 }
 
-let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port' | 'index'> | undefined = undefined;
+let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port' | 'name' | 'index'> | undefined = undefined;
 
 let lastActiveTime: moment.Moment | undefined = undefined;
 
@@ -81,9 +82,11 @@ export function initUpstreamPool() {
     };
   }
   upstreamServerAddresses = globalConfig.get('upstream', upstreamServerAddresses);
-  upstreamServerAddresses = upstreamServerAddresses.map(
-    (v, i) => assign(v, defaultUpstreamInfo, {index: i}),
-  );
+  upstreamServerAddresses = upstreamServerAddresses
+    .filter(v => isString(v.host) && isNumber(v.port) && (!v.name ? true : isString(v.name)))
+    .map(
+      (v, i) => assign(v, defaultUpstreamInfo, {index: i}),
+    );
   if (upstreamServerAddresses.length === 0) {
     console.error('initUpstreamPool (upstreamServerAddresses.length === 0)');
     throw new Error('initUpstreamPool (upstreamServerAddresses.length === 0)');
