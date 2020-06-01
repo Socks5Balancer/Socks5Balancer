@@ -200,11 +200,11 @@ export function getServerBasedOnAddress(host: string | undefined) {
   switch (upstreamSelectRule) {
     case UpstreamSelectRule.loop:
       s = getNextServer();
-      console.log('getServerBasedOnAddress:', s);
+      // console.log('getServerBasedOnAddress:', s);
       return s;
     case UpstreamSelectRule.one_by_one:
       s = tryGetLastServer();
-      console.log('getServerBasedOnAddress:', s);
+      // console.log('getServerBasedOnAddress:', s);
       return s;
     case UpstreamSelectRule.change_by_time:
       if (moment().diff(lastChangeUpstreamTime) > globalConfig.get('serverChangeTime', 60 * 1000)) {
@@ -213,7 +213,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
       } else {
         s = tryGetLastServer();
       }
-      console.log('getServerBasedOnAddress:', s);
+      // console.log('getServerBasedOnAddress:', s);
       return s;
     case UpstreamSelectRule.random:
     default:
@@ -223,7 +223,7 @@ export function getServerBasedOnAddress(host: string | undefined) {
       } else {
         s = undefined;
       }
-      console.log('getServerBasedOnAddress:', s);
+      // console.log('getServerBasedOnAddress:', s);
       return s;
   }
 }
