@@ -53,10 +53,12 @@ it must encode with `UTF-8 no BOM`
       "port": 3000                          // the backend server port
     },
     {
+      "name": "Server Name B",
       "host": "127.0.0.1",
       "port": 3001
     },
     {
+      "name": "Server Name C",
       "host": "127.0.0.1",
       "port": 3002
     }
