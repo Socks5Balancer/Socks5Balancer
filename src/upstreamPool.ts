@@ -321,7 +321,7 @@ export function startCheckTimer() {
               upstreamServerAddresses[i].lastConnectFailed = true;
             }
           }
-          printPoolState();
+          // printPoolState();
         }
       });
   });
