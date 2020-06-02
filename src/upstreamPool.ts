@@ -275,14 +275,16 @@ export function startCheckTimer() {
   }
   tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod)).subscribe(() => {
     if (checkNeedSleep()) return;
-    bluebird.all(upstreamServerAddresses.map(u => testTcp(u.host, u.port)))
-      .then(A => {
+    bluebird.all(upstreamServerAddresses.map(
+      u => bluebird.resolve(testTcp(u.host, u.port)).reflect()
+    ))
+      .then((A: bluebird.Inspection<boolean>[]) => {
         // the testTcp resolve true if ok, resolve false if error
         // we wait all resolve, then check result one by one
         if (A.length === upstreamServerAddresses.length) {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
-            if (A[i]) {
+            if (A[i].isFulfilled()) {
               if (upstreamServerAddresses[i].isOffline) {
                 // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
                 upstreamServerAddresses[i].lastConnectFailed = false;
@@ -300,12 +302,12 @@ export function startCheckTimer() {
     if (checkNeedSleep()) return;
     const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
     const testRemotePort = globalConfig.get('testRemotePort', undefined);
-    const A = upstreamServerAddresses.map(u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)));
-    bluebird.all(A)
-      .catch(E => {
-        // ignore it
-      })
-      .finally(() => {
+    bluebird.all(upstreamServerAddresses.map(
+      // http://bluebirdjs.com/docs/api/reflect.html
+      // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
+      u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)).reflect()
+    ))
+      .then((A: bluebird.Inspection<boolean>[]) => {
         // the testSocks5 return string if ok, return reject if error
         // we only wait all complete, then check complete state one by one
         if (A.length === upstreamServerAddresses.length) {
