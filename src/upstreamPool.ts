@@ -287,7 +287,21 @@ export function startCheckTimer() {
   tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod)).subscribe(() => {
     if (checkNeedSleep()) return;
     bluebird.all(upstreamServerAddresses.map(
-      u => bluebird.resolve(testTcp(u.host, u.port)).reflect()
+      // http://bluebirdjs.com/docs/api/reflect.html
+      // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
+      (u, i) => {
+        return bluebird.resolve(testTcp(u.host, u.port))
+          .then(value => {
+            // fast success
+            if (upstreamServerAddresses[i].isOffline) {
+              // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
+              upstreamServerAddresses[i].lastConnectFailed = false;
+            }
+            upstreamServerAddresses[i].lastOnlineTime = moment();
+            upstreamServerAddresses[i].isOffline = false;
+            return value;
+          }).reflect();
+      }
     ))
       .then((A: bluebird.Inspection<boolean>[]) => {
         // the testTcp resolve true if ok, resolve false if error
@@ -316,7 +330,16 @@ export function startCheckTimer() {
     bluebird.all(upstreamServerAddresses.map(
       // http://bluebirdjs.com/docs/api/reflect.html
       // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
-      u => bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort)).reflect()
+      (u, i) => {
+        return bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort))
+          .then(value => {
+            // fast success
+            upstreamServerAddresses[i].lastConnectCheckResult = value;
+            upstreamServerAddresses[i].lastConnectTime = moment();
+            upstreamServerAddresses[i].lastConnectFailed = false;
+            return value;
+          }).reflect();
+      }
     ))
       .then((A: bluebird.Inspection<boolean>[]) => {
         // the testSocks5 return string if ok, return reject if error
