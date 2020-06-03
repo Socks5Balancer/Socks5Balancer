@@ -162,7 +162,7 @@ export function checkHaveUsableServer() {
   return !!upstreamServerAddresses.find(u => checkServer(u));
 }
 
-function checkServer(u: UpstreamInfo) {
+export function checkServer(u: UpstreamInfo) {
   // return true if server alive (is a valid server)
   return !isNil(u.lastConnectTime) && !isNil(u.lastOnlineTime) && !u.isOffline && !u.lastConnectFailed && !u.isManualDisable;
 }

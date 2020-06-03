@@ -20,7 +20,7 @@ import {globalConfig} from '../configLoader';
 import {render} from 'ejs';
 import {refMonitorCenter} from './monitorCenter';
 import {
-  checkHaveUsableServer,
+  checkHaveUsableServer, checkServer,
   cleanAllCheckState,
   endAllConnectOnUpstream,
   forceCheckNow,
@@ -146,6 +146,7 @@ now rule: <%= rule %>
         <th>lastTCPCheckTime</th>
         <th>lastConnectCheckTime</th>
         <th>ManualDisable</th>
+        <th>Usable</th>
         <th>Close Connect</th>
         <th>Select</th>
         <th>data</th>
@@ -160,14 +161,18 @@ now rule: <%= rule %>
             <td><%= u.host %>:<%= u.port %></td>
             <td><%= (!u.name ? '' : u.name) %></td>
             <td>
-                <% if(!u.isOffline){ %>
+                <% if(!u.lastOnlineTime){ %>
+                    <span style="color: gray">Unknown</span>
+                <% } else if(!u.isOffline){ %>
                     <span style="color: green">True</span>
                 <% } else { %>
                     <span style="color: red">False</span>
                 <% } %>
             </td>
             <td>
-                <% if(!u.lastConnectFailed){ %>
+                <% if(!u.lastConnectTime){ %>
+                    <span style="color: gray">Unknown</span>
+                <% } else if(!u.lastConnectFailed){ %>
                     <span style="color: green">True</span>
                 <% } else { %>
                     <span style="color: red">False</span>
@@ -186,6 +191,13 @@ now rule: <%= rule %>
                 <% } %>
             </td>
             <td>
+                <% if(isWork(u)){ %>
+                    <span style="color: green">True</span>
+                <% } else { %>
+                    <span style="color: red">False</span>
+                <% } %>
+            </td>
+            <td>
                 <a href="/op?endConnectOnServer=<%= i %>">Close Connect</a>
             </td>
             <td>
@@ -199,7 +211,7 @@ now rule: <%= rule %>
     </tbody>
     <tfoot>
     <tr>
-        <td colspan="13">
+        <td colspan="14">
             &emsp;<a href="/op?cleanAllCheckState=1">Clean Check State</a>
             &emsp;<a href="/op?endAllConnect=1">Force Close All Connect</a>
             &emsp;<a href="/op?forceCheckAllServer=1">Force Check All Now</a>
@@ -260,6 +272,7 @@ listen On: <%= listenOn %>
       UpstreamSelectRuleList: UpstreamSelectRuleList,
       listenOn: getListenInfo().listenHost + ':' + getListenInfo().listenPort,
       lastUseUpstreamIndex: getLastUseUpstreamIndex(),
+      isWork: checkServer,
       speedArray: speedArray,
       dataArray: dataArray,
     });
