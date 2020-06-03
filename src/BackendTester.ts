@@ -38,7 +38,7 @@ export function testSocks5(
       host: host,
       port: port,
     };
-    shttps.get(opt, (res: IncomingMessage) => {
+    const cr = shttps.get(opt, (res: IncomingMessage) => {
       res.setEncoding('utf8');
       // resolve(res);
       resolve(`${res.statusCode}, ${res.statusMessage}`);
@@ -51,6 +51,11 @@ export function testSocks5(
     }).on('error', (err: Error) => {
       console.error(`testSocks5 error on ${socksHost}:${socksPort}:`, err);
       reject(err);
+    });
+    cr.setTimeout(globalConfig.get('socksTestTimeout', 15 * 1000), () => {
+      console.error(`testSocks5 socket timeout on ${socksHost}:${socksPort}:`, cr.socket);
+      cr.socket.destroy();
+      reject(new bluebird.TimeoutError('request timeout.'));
     });
   });
 }

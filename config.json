@@ -3,6 +3,7 @@
   "listenPort": 5000,
   "retryTimes": 3,
   "connectTimeout": 2000,
+  "socksTestTimeout": 15000,
   "testRemoteHost": "www.google.com",
   "testRemotePort": 443,
   "tcpCheckPeriod": 5000,
