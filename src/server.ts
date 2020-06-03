@@ -20,7 +20,13 @@
 // Create the proxy server
 import net from 'net';
 import {globalConfig} from './configLoader';
-import {getServerBasedOnAddress, getUpstreamServerSocketStorage, updateActiveTime, updateOnlineTime} from './upstreamPool';
+import {
+  getServerBasedOnAddress,
+  getUpstreamServerSocketStorage,
+  SocketStoragePair,
+  updateActiveTime,
+  updateOnlineTime
+} from './upstreamPool';
 import bluebird from 'bluebird';
 import moment from 'moment';
 import {refMonitorCenter} from './stateServer/monitorCenter';
@@ -102,19 +108,23 @@ export function initServer() {
           ++upstream.connectCount;
           ++refMonitorCenter().connectCount;
           refMonitorCenter().lastConnectServer = upstream;
-          getUpstreamServerSocketStorage()[upstream.index].add(s);
+          const ssp: SocketStoragePair = {
+            up: socket,
+            down: s,
+          };
+          getUpstreamServerSocketStorage()[upstream.index].add(ssp);
           socket.on('close', () => {
           });
           s.on('close', () => {
-            if (getUpstreamServerSocketStorage()[upstream.index].has(s)) {
-              getUpstreamServerSocketStorage()[upstream.index].delete(s);
+            if (getUpstreamServerSocketStorage()[upstream.index].has(ssp)) {
+              getUpstreamServerSocketStorage()[upstream.index].delete(ssp);
               --refMonitorCenter().connectCount;
               --upstream.connectCount;
             }
           });
           s.on('error', e => {
-            if (getUpstreamServerSocketStorage()[upstream.index].has(s)) {
-              getUpstreamServerSocketStorage()[upstream.index].delete(s);
+            if (getUpstreamServerSocketStorage()[upstream.index].has(ssp)) {
+              getUpstreamServerSocketStorage()[upstream.index].delete(ssp);
               --refMonitorCenter().connectCount;
               --upstream.connectCount;
             }

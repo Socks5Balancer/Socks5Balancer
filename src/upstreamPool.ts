@@ -63,14 +63,23 @@ export function checkNeedSleep() {
 }
 
 let upstreamServerAddresses: UpstreamInfo[] = [];
-const upstreamServerSocketStorage: Set<net.Socket>[] = [];
+
+export interface SocketStoragePair {
+  up: net.Socket;
+  down: net.Socket;
+}
+
+const upstreamServerSocketStorage: Set<SocketStoragePair>[] = [];
 
 export function getUpstreamServerSocketStorage() {
   return upstreamServerSocketStorage;
 }
 
 export function endAllConnectOnUpstream(u: UpstreamInfo) {
-  upstreamServerSocketStorage[u.index].forEach(s => s.end());
+  upstreamServerSocketStorage[u.index].forEach(s => {
+    s.up.end();
+    s.down.end();
+  });
 }
 
 export function initUpstreamPool() {
