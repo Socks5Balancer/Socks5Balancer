@@ -121,10 +121,10 @@ export function initServer() {
             if (globalConfig.get('internalBehavior.connectResetMeansOffline', true)) {
               upstream.isOffline = true;
             }
-            console.warn(`a error come from backend: ${upstream.host}:${upstream.port} of:`, e);
+            // console.warn(`a error come from backend: ${upstream.host}:${upstream.port} of:`, e);
           });
           socket.on('error', e => {
-            console.warn(`a error come from frontend after connected to backend: ${upstream.host}:${upstream.port} of:`, e);
+            // console.warn(`a error come from frontend after connected to backend: ${upstream.host}:${upstream.port} of:`, e);
           });
         });
         // if no error, dont retry and break the for-loop
