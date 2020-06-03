@@ -310,12 +310,12 @@ export function startCheckTimer() {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
             if (A[i].isFulfilled()) {
-              if (upstreamServerAddresses[i].isOffline) {
-                // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
-                upstreamServerAddresses[i].lastConnectFailed = false;
-              }
-              upstreamServerAddresses[i].lastOnlineTime = t;
-              upstreamServerAddresses[i].isOffline = false;
+              // if (upstreamServerAddresses[i].isOffline) {
+              //   // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
+              //   upstreamServerAddresses[i].lastConnectFailed = false;
+              // }
+              // upstreamServerAddresses[i].lastOnlineTime = t;
+              // upstreamServerAddresses[i].isOffline = false;
             } else {
               upstreamServerAddresses[i].isOffline = true;
             }
@@ -348,9 +348,9 @@ export function startCheckTimer() {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
             if (A[i].isFulfilled()) {
-              upstreamServerAddresses[i].lastConnectCheckResult = A[i].value();
-              upstreamServerAddresses[i].lastConnectTime = t;
-              upstreamServerAddresses[i].lastConnectFailed = false;
+              // upstreamServerAddresses[i].lastConnectCheckResult = A[i].value();
+              // upstreamServerAddresses[i].lastConnectTime = t;
+              // upstreamServerAddresses[i].lastConnectFailed = false;
             } else {
               upstreamServerAddresses[i].lastConnectFailed = true;
             }
