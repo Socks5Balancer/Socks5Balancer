@@ -20,7 +20,7 @@ import {testSocks5, testTcp} from './BackendTester';
 import {globalConfig} from './configLoader';
 import {Observable, Subscription, timer, merge, Subject} from 'rxjs';
 import moment from 'moment';
-import {assign, isString, isNumber} from 'lodash';
+import {assign, isString, isNumber, isNil} from 'lodash';
 import bluebird from 'bluebird';
 import * as net from 'net';
 
@@ -38,11 +38,11 @@ export interface UpstreamInfo {
   host: string;
   port: number;
   name: string | undefined;
-  lastOnlineTime: moment.Moment;
-  lastConnectTime: moment.Moment;
-  lastConnectFailed?: boolean;
+  lastOnlineTime: moment.Moment | undefined;
+  lastConnectTime: moment.Moment | undefined;
+  lastConnectFailed: boolean;
   lastConnectCheckResult?: string | any;
-  isOffline?: boolean;
+  isOffline: boolean;
   connectCount: number;
   isManualDisable?: boolean;
 }
@@ -85,9 +85,11 @@ export function endAllConnectOnUpstream(u: UpstreamInfo) {
 export function initUpstreamPool() {
   if (!defaultUpstreamInfo) {
     defaultUpstreamInfo = {
-      lastOnlineTime: moment(),
-      lastConnectTime: moment(),
+      lastOnlineTime: undefined,
+      lastConnectTime: undefined,
       connectCount: 0,
+      isOffline: true,
+      lastConnectFailed: true,
     };
   }
   upstreamServerAddresses = globalConfig.get('upstream', upstreamServerAddresses);
@@ -162,7 +164,7 @@ export function checkHaveUsableServer() {
 
 function checkServer(u: UpstreamInfo) {
   // return true if server alive (is a valid server)
-  return !u.isOffline && !u.lastConnectFailed && !u.isManualDisable;
+  return !isNil(u.lastConnectTime) && !isNil(u.lastOnlineTime) && !u.isOffline && !u.lastConnectFailed && !u.isManualDisable;
 }
 
 // This is where you pick which server to proxy to
@@ -276,7 +278,7 @@ export function startCheckTimer() {
   }
   let connectCheckStart = globalConfig.get('connectCheckStart', 0);
   if (connectCheckStart < 100) {
-    connectCheckStart = 5 * 60 * 1000;
+    connectCheckStart = 1000;
   }
   let connectCheckPeriod = globalConfig.get('connectCheckPeriod', 0);
   if (connectCheckPeriod < 100) {

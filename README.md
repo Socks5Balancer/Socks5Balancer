@@ -38,7 +38,7 @@ it must encode with `UTF-8 no BOM`
   "tcpCheckPeriod": 5000,                   // how many Period of every backend live check. default is 5000ms (5s)
   "tcpCheckStart": 1000,                    // how many time we wait before first backend live check. default is 1000ms (1s)
   "connectCheckPeriod": 300000,             // how many Period of check every backend socks5 proxy work well. default is 300000ms (300s or 5min)
-  "connectCheckStart": 15000,               // how many time we wait before first check backend socks5 proxy work well. default is 15000ms (15s)
+  "connectCheckStart": 1000,               // how many time we wait before first check backend socks5 proxy work well. default is 1000ms (1s)
   "upstreamSelectRule": "random",           // the Load Balance Rule. default is `random`
   "sleepTime": 1800000,                     // how many time we need to sleep after last connect. default is 1800000ms (1800s or 30min)
   "serverChangeTime": 5000,                 // the config of Load Balance Rule `change_by_time`. default is 5000ms (5s)
