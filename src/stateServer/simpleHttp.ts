@@ -30,7 +30,7 @@ import {
   setNowRule,
   UpstreamSelectRuleList,
 } from '../upstreamPool';
-import {isString, get, has, parseInt, isNil} from 'lodash';
+import {isString, get, has, parseInt, isNil, omit, pick} from 'lodash';
 import moment from 'moment';
 import express from 'express';
 import {getListenInfo} from '../server';
@@ -267,7 +267,8 @@ listen On: <%= listenOn %>
     return res.send(outData);
   });
   router.all('/op', (req, res) => {
-    console.log('/op:', req);
+    console.log('/op:', pick(req,
+      ['body', 'params', 'query', 'originalUrl', '_parsedUrl', 'baseUrl', 'ip', 'protocol', 'headers', 'httpVersion']));
     const upstreamPool = getUpstreamServerAddresses();
     if (isString(req.query.newRule)) {
       if (UpstreamSelectRuleList.find(v => v === req.query.newRule)) {
