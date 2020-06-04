@@ -2,6 +2,11 @@
 A Simple TCP Socket Balancer for balance Multi Socks5 Proxy Backend
 
 ---
+## Monitor
+
+![Monitor Screen](https://github.com/Lyoko-Jeremie/Socks5Balancer/wiki/monitor-screen.png)
+
+---
 
 ## Features
 1. Load Balance user connect to multi backend with multi rule
