@@ -23,6 +23,7 @@ import moment from 'moment';
 import {assign, isString, isNumber, isNil} from 'lodash';
 import bluebird from 'bluebird';
 import * as net from 'net';
+import {filter} from 'rxjs/operators';
 
 export enum UpstreamSelectRule {
   loop = 'loop',
@@ -264,6 +265,7 @@ export function endCheckTimer() {
 }
 
 const forceCheckObservable = new Subject();
+let additionCheckTimer: Observable<any> | undefined = undefined;
 
 export function forceCheckNow() {
   forceCheckObservable.next();
@@ -289,9 +291,19 @@ export function startCheckTimer() {
   }
   let connectCheckPeriod = globalConfig.get('connectCheckPeriod', 0);
   if (connectCheckPeriod < 100) {
-    connectCheckPeriod = 15 * 1000;
+    connectCheckPeriod = 5 * 60 * 1000;
   }
-  tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod)).subscribe(() => {
+  let additionCheckPeriod = globalConfig.get('additionCheckPeriod', 0);
+  if (additionCheckPeriod < 100) {
+    additionCheckPeriod = 10 * 1000;
+  }
+  const additionCheckStart = (tcpCheckStart + connectCheckStart + tcpCheckPeriod) * 2 + connectCheckPeriod;
+  additionCheckTimer = timer(additionCheckStart, additionCheckPeriod)
+    .pipe(
+      filter(() => !checkHaveUsableServer()),
+      filter(() => !checkNeedSleep()),
+    );
+  tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod), additionCheckTimer).subscribe(() => {
     if (checkNeedSleep()) return;
     bluebird.all(upstreamServerAddresses.map(
       // http://bluebirdjs.com/docs/api/reflect.html
@@ -334,7 +346,7 @@ export function startCheckTimer() {
         }
       });
   });
-  connectCheckTimer = merge(forceCheckObservable, timer(connectCheckStart, connectCheckPeriod)).subscribe(() => {
+  connectCheckTimer = merge(forceCheckObservable, timer(connectCheckStart, connectCheckPeriod), additionCheckTimer).subscribe(() => {
     if (checkNeedSleep()) return;
     const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
     const testRemotePort = globalConfig.get('testRemotePort', undefined);

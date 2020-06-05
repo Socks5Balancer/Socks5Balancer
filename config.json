@@ -10,6 +10,7 @@
   "tcpCheckStart": 1000,
   "connectCheckPeriod": 300000,
   "connectCheckStart": 1000,
+  "additionCheckPeriod": 10000,
   "upstreamSelectRule": "random",
   "sleepTime": 1800000,
   "serverChangeTime": 5000,
