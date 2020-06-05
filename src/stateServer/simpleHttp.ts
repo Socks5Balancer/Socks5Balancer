@@ -93,6 +93,7 @@ export function startHttpStateServer() {
 <html lang="zh">
 <header>
     <meta charset="UTF-8"/>
+    <title>Socks5Balancer</title>
     <style type="text/css">
         th {
             border: black 0 dashed;
