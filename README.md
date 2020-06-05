@@ -65,7 +65,8 @@ it must encode with `UTF-8 no BOM`
     {
       "name": "Server Name C",
       "host": "127.0.0.1",
-      "port": 3002
+      "port": 3002,
+      "disable": 1                          // if set the "disable" as NOT Falsy (Falsy means 0,false,null,undefined..),  this server will disable by default
     }
   ],
   "internalBehavior": {                     // some inner config , if you dont known how it work, you dont need care it.

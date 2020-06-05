@@ -45,9 +45,10 @@ export interface UpstreamInfo {
   isOffline: boolean;
   connectCount: number;
   isManualDisable?: boolean;
+  disable?: boolean;
 }
 
-let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port' | 'name' | 'index'> | undefined = undefined;
+let defaultUpstreamInfo: Omit<UpstreamInfo, 'host' | 'port' | 'name' | 'index' | 'disable'> | undefined = undefined;
 
 let lastActiveTime: moment.Moment | undefined = undefined;
 
@@ -97,7 +98,13 @@ export function initUpstreamPool() {
     .filter(v => isString(v.host) && isNumber(v.port) && (!v.name ? true : isString(v.name)))
     .map(
       (v, i) => assign(v, defaultUpstreamInfo, {index: i}),
-    );
+    )
+    .map(v => {
+      if (!!v.disable) {
+        v.isManualDisable = true;
+      }
+      return v;
+    });
   if (upstreamServerAddresses.length === 0) {
     console.error('initUpstreamPool (upstreamServerAddresses.length === 0)');
     throw new Error('initUpstreamPool (upstreamServerAddresses.length === 0)');
