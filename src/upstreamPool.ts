@@ -297,7 +297,7 @@ export function startCheckTimer() {
   if (additionCheckPeriod < 100) {
     additionCheckPeriod = 10 * 1000;
   }
-  const additionCheckStart = (tcpCheckStart + connectCheckStart + tcpCheckPeriod) * 2 + connectCheckPeriod;
+  const additionCheckStart = (tcpCheckStart + connectCheckStart + tcpCheckPeriod) * 2;
   additionCheckTimer = timer(additionCheckStart, additionCheckPeriod)
     .pipe(
       filter(() => !checkHaveUsableServer()),
@@ -332,6 +332,7 @@ export function startCheckTimer() {
         if (A.length === upstreamServerAddresses.length) {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
+            const d = upstreamServerAddresses[i].lastOnlineTime?.diff(t);
             if (A[i].isFulfilled()) {
               // if (upstreamServerAddresses[i].isOffline) {
               //   // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
@@ -339,7 +340,7 @@ export function startCheckTimer() {
               // }
               // upstreamServerAddresses[i].lastOnlineTime = t;
               // upstreamServerAddresses[i].isOffline = false;
-            } else {
+            } else if (isNil(d) || d < 0) {
               upstreamServerAddresses[i].isOffline = true;
             }
           }
@@ -374,11 +375,12 @@ export function startCheckTimer() {
         if (A.length === upstreamServerAddresses.length) {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
+            const d = upstreamServerAddresses[i].lastConnectTime?.diff(t);
             if (A[i].isFulfilled()) {
               // upstreamServerAddresses[i].lastConnectCheckResult = A[i].value();
               // upstreamServerAddresses[i].lastConnectTime = t;
               // upstreamServerAddresses[i].lastConnectFailed = false;
-            } else {
+            } else if (isNil(d) || d < 0) {
               upstreamServerAddresses[i].lastConnectFailed = true;
             }
           }
