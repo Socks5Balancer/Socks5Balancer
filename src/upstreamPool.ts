@@ -297,17 +297,21 @@ export function startCheckTimer() {
       // http://bluebirdjs.com/docs/api/reflect.html
       // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
       (u, i) => {
-        return bluebird.resolve(testTcp(u.host, u.port))
-          .then(value => {
-            // fast success
-            if (upstreamServerAddresses[i].isOffline) {
-              // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
-              upstreamServerAddresses[i].lastConnectFailed = false;
-            }
-            upstreamServerAddresses[i].lastOnlineTime = moment();
-            upstreamServerAddresses[i].isOffline = false;
-            return value;
-          }).reflect();
+        if (!u.isManualDisable) {
+          return bluebird.resolve(testTcp(u.host, u.port))
+            .then(value => {
+              // fast success
+              if (upstreamServerAddresses[i].isOffline) {
+                // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
+                upstreamServerAddresses[i].lastConnectFailed = false;
+              }
+              upstreamServerAddresses[i].lastOnlineTime = moment();
+              upstreamServerAddresses[i].isOffline = false;
+              return value;
+            }).reflect();
+        } else {
+          return bluebird.reject('u.isManualDisable').reflect();
+        }
       }
     ))
       .then((A: bluebird.Inspection<boolean>[]) => {
@@ -338,14 +342,18 @@ export function startCheckTimer() {
       // http://bluebirdjs.com/docs/api/reflect.html
       // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
       (u, i) => {
-        return bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort))
-          .then(value => {
-            // fast success
-            upstreamServerAddresses[i].lastConnectCheckResult = value;
-            upstreamServerAddresses[i].lastConnectTime = moment();
-            upstreamServerAddresses[i].lastConnectFailed = false;
-            return value;
-          }).reflect();
+        if (!u.isManualDisable) {
+          return bluebird.resolve(testSocks5(u.host, u.port, testRemoteHost, testRemotePort))
+            .then(value => {
+              // fast success
+              upstreamServerAddresses[i].lastConnectCheckResult = value;
+              upstreamServerAddresses[i].lastConnectTime = moment();
+              upstreamServerAddresses[i].lastConnectFailed = false;
+              return value;
+            }).reflect();
+        } else {
+          return bluebird.reject('u.isManualDisable').reflect();
+        }
       }
     ))
       .then((A: bluebird.Inspection<boolean>[]) => {
