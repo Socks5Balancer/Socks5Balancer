@@ -49,6 +49,10 @@ export function initServer() {
 
     updateActiveTime();
 
+    socket.on('error', e => {
+      // console.warn(`a error come from frontend:`, e);
+    });
+
     for (let i = 0; i < globalConfig.get('retryTimes', 3); ++i) {
       // retry 3 times
       try {
