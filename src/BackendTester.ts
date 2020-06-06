@@ -68,10 +68,21 @@ export async function testTcp(
   const p = new bluebird<net.Socket>((resolve, reject) => {
     try {
       const _s = net.createConnection(socksPort, socksHost, () => {
-        resolve(_s);
+        // socks5 handshake client to server
+        _s.write(Uint8Array.from([0x05, 0x01, 0x00]));
       });
       _s.on('error', e => {
         reject(e);
+      });
+      _s.once('data', (data) => {
+        // socks5 handshake server answer client
+        if (data[0] === 0x05 && data[1] === 0x00) {
+          // console.log('data:', data);
+          resolve(_s);
+        }else {
+          console.error('testTcp socks5 handshake server answer wrong, data:', data);
+          reject(_s);
+        }
       });
     } catch (e) {
       reject(e);
