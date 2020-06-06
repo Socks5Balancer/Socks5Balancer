@@ -113,7 +113,12 @@ export function initUpstreamPool() {
   upstreamServerAddresses.forEach(() => {
     upstreamServerSocketStorage.push(new Set());
   });
-  nowUpstreamSelectRule = globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random);
+  const _rule = String(globalConfig.get('upstreamSelectRule', UpstreamSelectRule.random)).trim() as any;
+  if (!!UpstreamSelectRuleList.find(v => v === _rule)) {
+    nowUpstreamSelectRule = _rule;
+  } else {
+    nowUpstreamSelectRule = UpstreamSelectRule.random;
+  }
   startCheckTimer();
 }
 
