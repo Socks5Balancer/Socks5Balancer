@@ -68,6 +68,36 @@ export async function testTcp(
   const p = new bluebird<net.Socket>((resolve, reject) => {
     try {
       const _s = net.createConnection(socksPort, socksHost, () => {
+        resolve(_s);
+      });
+      _s.on('error', e => {
+        reject(e);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+  // if timeout, will throw a bluebird.TimeoutError
+  // http://bluebirdjs.com/docs/api/timeout.html
+  return p.timeout(globalConfig.get('connectTimeout', 2 * 1000)).then(s => {
+    // we only test it can be connect
+    s.end();
+    s.destroy();
+    return true;
+  }).catch(e => {
+    console.error(`testTcp error on ${socksHost}:${socksPort}:`, e);
+    return false;
+  });
+}
+
+export async function testSocks5Handshake(
+  socksHost: string = '127.0.0.1',
+  socksPort: number = 1080,
+) {
+  // try to connect
+  const p = new bluebird<net.Socket>((resolve, reject) => {
+    try {
+      const _s = net.createConnection(socksPort, socksHost, () => {
         // socks5 handshake client to server
         _s.write(Uint8Array.from([0x05, 0x01, 0x00]));
       });
@@ -79,7 +109,7 @@ export async function testTcp(
         if (data[0] === 0x05 && data[1] === 0x00) {
           // console.log('data:', data);
           resolve(_s);
-        }else {
+        } else {
           console.error('testTcp socks5 handshake server answer wrong, data:', data);
           reject(_s);
         }
