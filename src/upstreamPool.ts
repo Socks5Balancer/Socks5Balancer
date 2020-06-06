@@ -317,13 +317,15 @@ export function startCheckTimer() {
         if (!u.isManualDisable) {
           return bluebird.resolve(testTcp(u.host, u.port))
             .then(value => {
-              // fast success
-              if (upstreamServerAddresses[i].isOffline) {
-                // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
-                upstreamServerAddresses[i].lastConnectFailed = false;
+              if (value) {
+                // fast success
+                if (upstreamServerAddresses[i].isOffline) {
+                  // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
+                  upstreamServerAddresses[i].lastConnectFailed = false;
+                }
+                upstreamServerAddresses[i].lastOnlineTime = moment();
+                upstreamServerAddresses[i].isOffline = false;
               }
-              upstreamServerAddresses[i].lastOnlineTime = moment();
-              upstreamServerAddresses[i].isOffline = false;
               return value;
             }).reflect();
         } else {
@@ -338,7 +340,7 @@ export function startCheckTimer() {
           const t = moment();
           for (let i = 0; i !== A.length; ++i) {
             const d = upstreamServerAddresses[i].lastOnlineTime?.diff(t);
-            if (A[i].isFulfilled()) {
+            if (A[i].isFulfilled() && A[i].value()) {
               // if (upstreamServerAddresses[i].isOffline) {
               //   // if a upstream revive from tcp dead, means it was closed before, we need rescue it from other connectCheck
               //   upstreamServerAddresses[i].lastConnectFailed = false;
