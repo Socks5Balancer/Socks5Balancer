@@ -1,6 +1,8 @@
 # Socks5Balancer
 A Simple TCP Socket Balancer for balance Multi Socks5 Proxy Backend
 
+**End Maintenance, Please Use [Socks5BalancerAsio](https://github.com/Lyoko-Jeremie/Socks5BalancerAsio/) Instead**
+
 ---
 ## Monitor
 
