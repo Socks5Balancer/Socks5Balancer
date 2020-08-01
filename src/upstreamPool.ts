@@ -310,7 +310,7 @@ export function startCheckTimer() {
     );
   tcpCheckTimer = merge(forceCheckObservable, timer(tcpCheckStart, tcpCheckPeriod), additionCheckTimer).subscribe(() => {
     if (checkNeedSleep()) return;
-    bluebird.all(upstreamServerAddresses.map(
+    bluebird.allSettled(upstreamServerAddresses.map(
       // http://bluebirdjs.com/docs/api/reflect.html
       // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
       (u, i) => {
@@ -327,9 +327,9 @@ export function startCheckTimer() {
                 upstreamServerAddresses[i].isOffline = false;
               }
               return value;
-            }).reflect();
+            });
         } else {
-          return bluebird.reject('u.isManualDisable').reflect();
+          return bluebird.reject('u.isManualDisable');
         }
       }
     ))
@@ -358,7 +358,9 @@ export function startCheckTimer() {
     if (checkNeedSleep()) return;
     const testRemoteHost = globalConfig.get('testRemoteHost', undefined);
     const testRemotePort = globalConfig.get('testRemotePort', undefined);
-    bluebird.all(upstreamServerAddresses.map(
+    // use ES6 Promise.allSettled replace `Promise.all()+..then().reflect();`
+    // https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+    bluebird.allSettled(upstreamServerAddresses.map(
       // http://bluebirdjs.com/docs/api/reflect.html
       // https://stackoverflow.com/questions/46890710/wait-for-execution-of-all-promises-in-bluebird
       (u, i) => {
@@ -370,9 +372,9 @@ export function startCheckTimer() {
               upstreamServerAddresses[i].lastConnectTime = moment();
               upstreamServerAddresses[i].lastConnectFailed = false;
               return value;
-            }).reflect();
+            });
         } else {
-          return bluebird.reject('u.isManualDisable').reflect();
+          return bluebird.reject('u.isManualDisable');
         }
       }
     ))
